@@ -58,13 +58,22 @@
 %% the work being presented. Separate the keywords with commas.
 \keywords{datasets, neural networks, gaze detection, text tagging}
 
-% \begin{teaserfigure}
-%   \includegraphics[width=\textwidth]{round_robin_graph}
-%   \caption{Seattle Mariners at Spring Training, 2010.}
-%   \Description{Enjoying the baseball game from the third-base
-%   seats. Ichiro Suzuki preparing to bat.}
-%   \label{fig:teaser}
-% \end{teaserfigure}
+\begin{teaserfigure}
+  \begin{subfigure}[t]{0.5\textwidth}
+    \centering
+    \includegraphics[width=0.80\textwidth]{anti-greed_graph}
+    \caption{Seattle Mariners t Spring Training, 2010.}
+  \end{subfigure}%
+  \hfill
+  \begin{subfigure}[t]{0.5\textwidth}
+    \centering
+    \includegraphics[width=0.45\textwidth]{round_robin_graph}
+    \caption{Seattle Mariners t Spring Training, 2010.}
+  \end{subfigure}
+  \Description{Enjoying the baseball game from the third-base
+  seats. Ichiro Suzuki preparing to bat.}%
+  \label{fig:teaser}
+\end{teaserfigure}
 
 %% information and builds the first part of the formatted document.
 \maketitle
@@ -72,16 +81,16 @@
 
 \section{Introduction}
 \input{Chapters/Introduction}
-
-\section{Background}
+%
+\section{Background and Related Work}
 \input{Chapters/Background}
-
+%
 \section{Gadgets}
 \input{Chapters/Gadgets}
-
+%
 \section{Case Studies}
 \input{Chapters/Case_Studies}
-
+%
 \section{Results and Discussion}
 \input{Chapters/Results_and_Discussion}
 
