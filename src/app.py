@@ -16,6 +16,7 @@ import gadgets as g
 import utils   as u
 
 
+
 def find_cycle(s,graph):
     """Find a cycle in a graph. s is a solver object, graph is an adjacency list
     e.g. {0:[0,1,2,3,4,5], 1:[2,3] ...}. Given the graph iterate over the
