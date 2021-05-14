@@ -1,0 +1,76 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Packages %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{graphicx}
+\usepackage{epsfig}
+\usepackage{times}
+\usepackage[ruled,vlined]{algorithm2e}            %% for algorithms
+\usepackage{amsmath}
+\usepackage{amsthm}                  %% for theorems and definitions
+% \usepackage{amssymb}                 %% for arrows like rightarrowtail
+\usepackage{amsfonts}                %% \mathbb
+\usepackage{mathtools}               %% for coloneqq and others
+\usepackage{cases}                   %% better math brackets
+\usepackage{mathpartir}              %%% for inference rules
+\usepackage[nolist]{acronym}
+\usepackage{hyperref}                %% for auto references
+\usepackage{xpunctuate}              %% for punctuation's after macros
+\usepackage{cite}                    %% for bibliography ranges
+\usepackage{subcaption}              %% For complex figures with subfigures/subcaptions
+\usepackage{wrapfig}                 %% wrapping figures around text
+\usepackage{listings}                %% for source code lstlisting
+% \usepackage[dvipsnames]{xcolor}      %% For listings and better colors
+\usepackage{enumitem}                %% For better enumerate environment
+\setlist[description]{leftmargin=\parindent,labelindent=\parindent}
+\usepackage{caption}
+\usepackage{tikz}                    %% math visualizations
+\usetikzlibrary{matrix}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{positioning}
+\usetikzlibrary{shapes.multipart}
+\usetikzlibrary{automata}
+
+\usepackage{lib/paperCommands}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% End Packages %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Packages Configs %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\graphicspath{ {./Figures/} }
+
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem*{analysis}{Analysis}
+
+\SetKwInOut{Input}{Input}                % Set the Input
+\SetKwInOut{Output}{Output}              % set the Output
+
+\lstset{%
+  frame=top,frame=bottom,
+  basicstyle=\small\normalfont\ttfamily,    % the size of the fonts that are used for the code
+  stepnumber=1,                                % the step between two line-numbers. If it is 1 each line will be numbered
+  numbersep=10pt,                              % how far the line-numbers are from the code
+  tabsize=2,                                   % tab size in blank spaces
+  extendedchars=true,                          %
+  breaklines=true,                             % sets automatic line breaking
+  captionpos=t,                                % sets the caption-position to top
+  mathescape=true,
+  showstringspaces=false,
+  escapeinside={(*@}{@*)},
+}%
+
+%%%% new environment for sub-proofs
+\newenvironment{subproof}[1][\proofname]{%
+  \renewcommand{\qedsymbol}{\ensuremath{\blacksquare}}%
+  \begin{proof}[#1]%
+}{%
+  \end{proof}%
+}
+
+\newenvironment{MAlgorithm}[1][htb]
+  {\renewcommand{\algorithmcfname}{M}% Update algorithm name
+   \begin{algorithm}[#1]%
+  }{\end{algorithm}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% End Packages Configs %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

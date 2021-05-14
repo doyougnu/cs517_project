@@ -1,0 +1,99 @@
+% -*- mode: latex; -*-
+\documentclass[sigconf]{acmart}
+
+%%
+%% \BibTeX command to typeset BibTeX logo in the docs
+\AtBeginDocument{%
+  \providecommand\BibTeX{{%
+    \normalfont B\kern-0.5em{\scshape i\kern-0.25em b}\kern-0.8em\TeX}}}
+
+%% Rights management information.  This information is sent to you
+%% when you complete the rights form.  These commands have SAMPLE
+%% values in them; it is your responsibility as an author to replace
+%% the commands and values with those provided to you when you
+%% complete the rights form.
+\setcopyright{acmcopyright}
+\copyrightyear{2021}
+\acmYear{2021}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Packages %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{include/packages}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Kick Off %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+\title{The Name of the Title is Hope}
+
+\author{Colin Shea-Blymyer}
+\email{sheablyc@oregonstate.edu}
+\affiliation{%
+  \institution{Oregon State University}
+  \city{Corvallis}
+  \state{Oregon}
+  \country{USA}
+}
+\author{Jeffrey M. Young}
+\email{youngjef@oregonstate.edu}
+\affiliation{%
+  \institution{Oregon State University}
+  \city{Corvallis}
+  \state{Oregon}
+  \country{USA}
+}
+
+\renewcommand{\shortauthors}{Shea-Blymyer and Young.}
+
+%%
+%% The abstract is a short summary of the work to be presented in the
+%% article.
+\begin{abstract}
+  \input{Chapters/Abstract}
+\end{abstract}
+
+%%
+%% Keywords. The author(s) should pick words that accurately describe
+%% the work being presented. Separate the keywords with commas.
+\keywords{datasets, neural networks, gaze detection, text tagging}
+
+% \begin{teaserfigure}
+%   \includegraphics[width=\textwidth]{round_robin_graph}
+%   \caption{Seattle Mariners at Spring Training, 2010.}
+%   \Description{Enjoying the baseball game from the third-base
+%   seats. Ichiro Suzuki preparing to bat.}
+%   \label{fig:teaser}
+% \end{teaserfigure}
+
+%% information and builds the first part of the formatted document.
+\maketitle
+
+
+\section{Introduction}
+\input{Chapters/Introduction}
+
+\section{Background}
+\input{Chapters/Background}
+
+\section{Gadgets}
+\input{Chapters/Gadgets}
+
+\section{Case Studies}
+\input{Chapters/Case_Studies}
+
+\section{Results and Discussion}
+\input{Chapters/Results_and_Discussion}
+
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{sample-base}
+
+
+%% If your work has an appendix, this is the place to put it.
+% \appendix
+
+
+
+\end{document}
+\endinput
