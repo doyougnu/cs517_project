@@ -32,8 +32,6 @@ anti_greed_graph = { 0: [1],
 
 def make_name(frm,to): return frm + "->" + to
 
-def make_cycle_name(name): return "-(" + (name[::-1].replace(">-", "->")) + ")"
-
 def cycle_check(s,v_from,v_to,name):
     """The cycle check is extremely simple, number the vertices in the graph from 0
     to n, then for each edge from v_from to v_to create a constraint that
