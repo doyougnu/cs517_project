@@ -1,0 +1,104 @@
+\NeedsTeXFormat{LaTeX2e}
+
+%
+% Macros defined just for this paper
+%
+\ProvidesPackage{lib/paperCommands}
+\RequirePackage[colorinlistoftodos,prependcaption,textwidth=4.5em,textsize=small]{todonotes}
+\setlength{\marginparwidth}{4.5em}
+
+%%%%%%%%%%%%%%
+% Meta notes %
+%%%%%%%%%%%%%%
+
+% \NOTE{...} produces a large, obvious black box.  Use \medskip within to break
+% up paragraphs if needed.  To make all note boxes invisible, add the following
+% line after importing this file.
+% \renewcommand{\NOTE}[1]{}
+\newlength{\dummylen}
+\newcommand{\NOTE}[1]{\setlength{\dummylen}{\fboxrule}\setlength{\fboxrule}{2pt}%
+  \vspace{1ex}\noindent\hfill%
+  \fbox{\begin{minipage}{.96\columnwidth}#1\end{minipage}}%
+  \setlength{\fboxrule}{\dummylen}\hfill{}\vspace{1ex}}
+
+% in-line comments
+\newcommand{\TODO}[1]{\ifdefined\color
+  {\color{red}[#1]}%
+  \else
+  {\emph{[#1]}}%
+  \fi}
+
+
+%%%%%%%%%%%%%%%%%% Inline Todos and Notes
+\newcommand{\itodo}[2][blue]{\{{\color{#1} #2}\}}
+\newcommand{\jeff}[1]{\NOTE{\color{RubineRed}#1}}
+\newcommand{\colin}[1]{\NOTE{\color{Cerulean}#1}}
+
+%%%%%%%%%%%%%%%%%% Problem Descriptions
+\newcommand{\problem}[1]{{\color{Gray} Problem Description: \newline{} #1}}
+
+%%%%%%%%%%%%%%%%%%% Relational algebra symbols
+
+%%%%%%%%%%%%%%%%%%% Essentials
+\newcommand{\kf}[1]{\ensuremath{\mathit{#1}}}              %% fix kerning
+\providecommand{\eg}[0]{e.g\xperiod}
+\providecommand{\ie}[0]{i.e\xperiod}
+\providecommand{\etal}[0]{et~al\xperiod}
+\providecommand{\cf}[0]{cf\xperiod}
+\providecommand{\aka}[0]{aka\xperiod}
+\providecommand{\ia}[0]{i.a\xperiod}
+\providecommand{\wrt}[0]{w.r.t\xperiod}
+\providecommand{\st}[0]{s.t\xperiod}
+\newcommand{\rn}[1]{\TirName{#1}}
+
+%%%%%%%%%%%%%%%%%%% Math classes
+\newcommand{\nats}[1]{\ensuremath{\mathbb{N}}}
+\newcommand{\bools}[1]{\ensuremath{\mathbb{B}}}
+
+%%%%%%%%%%%%%%%%%% Combinators
+\renewcommand{\complement}[1]{\ensuremath{\overline{#1}}}
+\newcommand{\range}[1]{\ensuremath{\kf{Ra}({#1})}}
+\newcommand{\reduces}[2]{\ensuremath{#1 \leq #2}}
+\newcommand{\with}[2]{\ensuremath{#1^{#2}}}
+\newcommand{\intersects}[2]{\ensuremath{#1 \cap #2}}
+\newcommand{\co}[1]{\text{co#1}}
+\newcommand{\complete}[1]{\text{#1C}}
+\newcommand{\hard}[1]{\text{#1-hard}}
+\newcommand{\kreduces}[2]{\ensuremath{#1 \leq_{p} #2}}
+\newcommand{\notkreduces}[2]{\ensuremath{#1 \nleq_{p} #2}}
+\newcommand{\setdifference}[2]{\ensuremath{#1 \setminus #2}}
+\newcommand{\set}[1]{\ensuremath{\{#1\}}}
+\newcommand{\setc}[2]{\set{#1\;|\;#2}}
+\newcommand{\magnitude}[1]{\ensuremath{|#1|}}
+\newcommand{\oraclize}[2]{\ensuremath{#1^{#2}}}
+
+%%%%%%%%%%%%%%%%%% saving some typing
+\newcommand{\homo}{\text{homomorphism}}
+\newcommand{\X}{\ensuremath{\kf{X}}}
+\newcommand{\f}{\ensuremath{\kf{f}}}
+\newcommand{\x}{\ensuremath{\kf{x}}}
+\newcommand{\aVar}[2]{\ensuremath{\alpha_{#1#2}}}
+\newcommand{\tVar}[2]{\ensuremath{t_{#1#2}}}
+\newcommand{\bVar}[2]{\ensuremath{\beta_{#1#2}}}
+\newcommand{\lang}[1]{\ensuremath{\kf{#1}}}
+\newcommand{\ssep}{\,;\,}
+\newcommand{\domino}[2]{\ensuremath{\frac{\aVar{#1}{#2}}{\bVar{#1}{#2}}}}
+\newcommand{\pipe}{\ensuremath{\mid}}
+\newcommand{\mprime}{\ensuremath{M'}}
+\newcommand{\mstar}{\with{M}{*}}
+\newcommand{\msstar}{\with{M}{**}}
+\newcommand{\xprime}{\with{x}{'}}
+\newcommand{\Lprime}{\with{L}{'}}
+\newcommand{\NP}{\text{NP}}
+\newcommand{\coNP}{\co{\NP}}
+\newcommand{\coNPc}{\complete{\coNP}}
+\newcommand{\NPc}{\complete{\NP}}
+\newcommand{\NPh}{\hard{\NP}}
+\newcommand{\coNPh}{\hard{\co{\NP}}}
+\newcommand{\satformula}{\ensuremath{\phi}}
+\newcommand{\fls}{\texttt{F}}
+\newcommand{\tru}{\texttt{T}}
+
+%%%% PCP helpers
+\newcommand{\pcpcfg}{\ensuremath{\kf{PCP}_{\kf{CFG}}}}
+\newcommand{\pcp}{\ensuremath{\kf{PCP}}}
