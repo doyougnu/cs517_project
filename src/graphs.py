@@ -10,12 +10,12 @@ Module which defines sample graphs
 """
 
 
-round_robin_graph = { 0: [1,2,3,4,5],
-                      1: [2,3,5],
-                      2: [3,4],
-                      3: [4,5],
-                      4: [1],
-                      5: [2,4]
+round_robin_graph = { "A": ["B","C","D","E","F"],
+                      "B": ["C","F"],
+                      "C": ["D","E"],
+                      "D": ["E","F"],
+                      "E": ["B"],
+                      "F": ["E","C"]
                     }
 
 anti_greed_graph = { 0: [1],

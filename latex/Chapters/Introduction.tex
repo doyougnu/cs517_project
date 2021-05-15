@@ -1,6 +1,54 @@
 \label{section:introduction}%
 
-Your introduced $\ldots{}$
+The minimum feedback arc set problem is a canonical NP-Complete problem given
+by\todo{add citation} \citet{KarpNPComplete}. Worse still, the problem is
+APX-hard\todo{cite Viggo Kann thesis} yet finding the minimum feedback arc set
+of a directed graph is desirable for many domains: such as certain rank-choice
+voting systems, tournament ranking systems\todo{cite}, and dependency graphs in
+general.
+
+Solutions to the minimum feedback arc set problem are commonly implemented in
+widely used graph libraries yet all suffer from a distinct flaw. While each
+implementation provides a solution, the implementations only do so without
+allowing the user to inspect intermediate steps; which might contain useful
+domain information. For example, the graph \autoref{fig:tournament-graph}
+displays a directed graph which encodes a single win tournament system. Each
+vertex is a player and each edge encodes a win over a contestant, for example we
+see that player E beat contestant B. Observe that the
+\autoref{fig:tournament-graph} contains cycles which implies that there is not a
+linear ordering amongst the contestants of the tournament, and so any ranking of
+the contestants would violate a win of one contestant over another. Removing the
+minimum feedback arc set would remove the cycles, which yields a linear order in
+the tournament that violates the fewest number of wins. In this example,
+intermediate results are edges which compose the minimum feedback arc set, thus
+if one had access to the intermediate results one might choose to rematch the
+opponents rather than remove the win. Crucially, the result of the rematch may
+change the final minimum feedback arc set. Such a procedure could therefore
+increase the confidence in the results of the tournament.
+
+To allow for \emph{inspectable incrementality} we propose a novel\todo{but is it
+  novel?} direction in solving the minimum feedback arc set problem based on
+recent advances in \ac{sat} and \ac{smt} solving. Our approach is to utilize an
+\ac{smt} solver to detect cycles and minimize the weight of the feedback arc
+set. Incrementality in this approach is given through use of an
+\emph{incremental} \ac{smt} solver and generation of \emph{unsatisfiable cores}.
+A minimum unsatisfiable core is the minimum set of clauses in a \ac{sat} or
+\ac{smt} formula which prevent a \ac{sat} or \ac{smt} solver run from finding a
+satisfiable assignment. An incremental solver provides the end-user the ability
+to add or remove constraints and thereby direct the solver during runtime.
+Incrementality in our approach is crucial as it the end-user decision points to
+interact with the solution process. Thus, an end-user might observe a
+unsatisfiable core which corresponds to a cycle and decide to resample
+\emph{only} those edges.
+
+The approach has benefits \ldots{}
+
+We make the following contributions:
+\begin{enumerate}
+\item Gadgets
+\item Evaluation of unsatisfiable cores for this problem domain
+\item empirical evaluation of this novel\todo{again, is it novel?} method
+\end{enumerate}
 
 
 

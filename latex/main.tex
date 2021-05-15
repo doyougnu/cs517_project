@@ -62,21 +62,24 @@
   \begin{subfigure}[t]{0.5\textwidth}
     \centering
     \includegraphics[width=0.80\textwidth]{anti-greed_graph}
-    \caption{Seattle Mariners t Spring Training, 2010.}
+    \caption{A three cycle graph which demonstrates that greedily selecting the
+      minimum weighted edge will not provide the minimum feedback arc set.}%
+    \label{fig:three-cycle}
   \end{subfigure}%
   \hfill
   \begin{subfigure}[t]{0.5\textwidth}
     \centering
     \includegraphics[width=0.45\textwidth]{round_robin_graph}
-    \caption{Seattle Mariners t Spring Training, 2010.}
+    \caption{A four cycle graph where each cycle depends on the edge \edge{E}{B}.}
+    \label{fig:tournament-graph}
   \end{subfigure}
   \Description{Enjoying the baseball game from the third-base
   seats. Ichiro Suzuki preparing to bat.}%
-  \label{fig:teaser}
 \end{teaserfigure}
 
 %% information and builds the first part of the formatted document.
 \maketitle
+\input{include/acronyms}
 
 
 \section{Introduction}

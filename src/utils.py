@@ -15,7 +15,7 @@ def make_name(frm,to): return frm + "->" + to
 
 def parse_edge(edge): # return list(map(int,edge.__str__().split("->")))
     str_edge = edge.__str__()
-    return list(map(int,str_edge.split("->")))
+    return list(map(lambda x: x,str_edge.split("->")))
 
 def parse_core(core):
     """Parse an unsat core. An unsat core is shallowly embedded as a list of z3

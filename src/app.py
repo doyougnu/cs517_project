@@ -15,6 +15,7 @@ solver handle.
 """
 
 from pprint import pprint
+from copy   import deepcopy
 import z3   as z
 
 import gadgets as g
@@ -52,7 +53,12 @@ def relax(graph, unsat_core, strategy):
     This function mutates graph
     """
     source, sink = strategy(unsat_core)
-    graph[source] = graph[source].remove(sink)
+    outgoing = deepcopy(graph[source])
+    print(graph[source])
+    print(outgoing)
+    print(sink in outgoing)
+    print(outgoing.remove(sink))
+    graph[source] = outgoing.remove(sink)
     if graph[source] is None: graph[source] = []
 
 def go (cache,s,graph):
@@ -65,6 +71,7 @@ def go (cache,s,graph):
 
         # get the core
         core = find_cycle(cache, s, graph)
+        pprint(core)
 
         # if the core is empty then we are done, if not then relax and recur
         if core:
