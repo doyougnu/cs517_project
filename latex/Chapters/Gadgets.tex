@@ -1,8 +1,20 @@
 \label{section:gadgets}
+%
+\begin{figure}[h]
+  \centering
+  \begin{lstlisting}[language=python,caption={Cycle check gadget. \texttt{v\_from}
+  and \texttt{v\_to} are symbolic variables in the solver. \texttt{name} is the constraint
+  label in the solver. The cycle check replaces each edge with the constraint
+  that previous vertices must be a lesser integer value than future vertices}]
+  def cycle_check(solver,v_from,v_to,name):
+      solver.assert_and_track(v_from < v_to, name)
+  \end{lstlisting}
+\end{figure}
 
-Dem ga\textbf{gd}ets
-
-
+\NOTE{We have a working implementation of a cycle detection gadget, strategies
+  for edge relaxation in the unsatisfiable core, and incremental constraint
+  solving in the \ac{sat} and \ac{smt} solver. See \github{} for the source
+  code.}
 
 %%% Local Variables:
 %%% mode: latex
