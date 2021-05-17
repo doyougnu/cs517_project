@@ -56,9 +56,15 @@ def relax(graph, unsat_core, strategy):
     This function mutates graph
     """
     source, sink = strategy(unsat_core)
-    graph.remove_edge(source, sink)
+    # pprint([source, sink])
+    # pprint(list(graph.adj.items()))
+    # print("Before: ", nx.to_dict_of_lists(graph))
+    graph.remove_edge(int(source),int(sink))
+    # print("After: ", nx.to_dict_of_lists(graph))
 
-def go (cache,s,graph):
+    return graph
+
+def runWithGraph(cache,s,graph):
     # flag to end loop
     done = False
 
@@ -69,13 +75,12 @@ def go (cache,s,graph):
 
         # get the core
         core = find_cycle(cache, s, graph)
-        pprint(core)
-        pprint(graph.adj.items())
 
         # if the core is empty then we are done, if not then relax and recur
+        # print("Core: ", core)
         if core:
             # relax an edge by some strategy
-            relax(graph,core,lambda x : x[0])
+            graph = relax(graph, core, lambda x : x[0])
 
             # this is good enough for now but in the future we should try to
             # remove only the right constraint, which will be much much faster
@@ -83,12 +88,17 @@ def go (cache,s,graph):
         else:
             done = True
 
+        # print("going: ", done)
+        # print("graph Nodes: ", graph.nodes())
+        # print("graph Edges: ", graph.edges())
 
-def main():
-    # just use a heterogeneous map as a cache
+    return graph
+
+def run():
     cache = {}
 
     # spin up the solver
     s = z.Solver()
 
-    go(cache,s,gs.round_robin_graph)
+    g = nx.DiGraph(nx.erdos_renyi_graph(5,0.5))
+    return nx.to_dict_of_lists(runWithGraph(cache,s,g))
