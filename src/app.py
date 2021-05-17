@@ -15,8 +15,11 @@ solver handle.
 """
 
 from pprint import pprint
-from copy   import deepcopy
-import z3   as z
+import z3       as z
+import networkx as nx
+from   networkx import Graph
+
+import matplotlib.pyplot as plt
 
 import gadgets as g
 import graphs  as gs
@@ -29,7 +32,7 @@ def find_cycle(cache,s,graph):
     graph, convert the key and values to symbolic terms and check for a cycle.
     Returns the unsat core as a list of strings e.g. [1->2, 2->3, 3->4, 4->1]
     """
-    for source, sinks in graph.items():
+    for source, sinks in graph.adj.items():
         for sink in sinks:
             ## convert to strings
             s_source = str(source)
@@ -53,13 +56,7 @@ def relax(graph, unsat_core, strategy):
     This function mutates graph
     """
     source, sink = strategy(unsat_core)
-    outgoing = deepcopy(graph[source])
-    print(graph[source])
-    print(outgoing)
-    print(sink in outgoing)
-    print(outgoing.remove(sink))
-    graph[source] = outgoing.remove(sink)
-    if graph[source] is None: graph[source] = []
+    graph.remove_edge(source, sink)
 
 def go (cache,s,graph):
     # flag to end loop
@@ -67,11 +64,13 @@ def go (cache,s,graph):
 
     # kick off
     while not done:
-        pprint(graph)
+        # nx.draw(graph)
+        # plt.show()
 
         # get the core
         core = find_cycle(cache, s, graph)
         pprint(core)
+        pprint(graph.adj.items())
 
         # if the core is empty then we are done, if not then relax and recur
         if core:

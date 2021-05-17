@@ -2,10 +2,12 @@ with import <nixpkgs> {};
 let
   pythonEnv = python38.withPackages (ps: [
     ps.numpy
+    ps.matplotlib
     ps.toolz
     ps.z3
     ps.importmagic
     ps.epc
+    ps.networkx
   ]);
 in mkShell {
   buildInputs = [
