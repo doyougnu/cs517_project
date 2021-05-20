@@ -40,3 +40,13 @@ def make_sym(cache, new, ty=Int):
         cache[new] = sym_new
 
     return cache, cache[new]
+
+def edge_list_to_dict(g):
+    ret = {}
+    for source,sink in g.get_edgelist():
+        if source not in ret.keys():
+            ret[source] = []
+
+        ret[source].append(sink)
+
+    return ret

@@ -7,13 +7,16 @@ let
     ps.z3
     ps.importmagic
     ps.epc
-    ps.networkx
+    ps.python-igraph
+    ps.jupyter
+    ps.pycairo
   ]);
 in mkShell {
   buildInputs = [
     pythonEnv
     z3
-
+    cairo
+    qt4
     python3
     python3.pkgs.requests
   ];

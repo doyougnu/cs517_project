@@ -11,13 +11,11 @@ You'll notice that we thread the solver instance and cache through several
 functions. This is purposeful to get as close as possible to referential
 transparency in python. Think of it as a Reader Monad carrying the cache and
 solver handle.
-
 """
 
 from pprint import pprint
 import z3       as z
-import networkx as nx
-from   networkx import Graph
+import igraph   as ig
 
 import matplotlib.pyplot as plt
 
@@ -32,18 +30,17 @@ def find_cycle(cache,s,graph):
     graph, convert the key and values to symbolic terms and check for a cycle.
     Returns the unsat core as a list of strings e.g. [1->2, 2->3, 3->4, 4->1]
     """
-    for source, sinks in graph.adj.items():
-        for sink in sinks:
-            ## convert to strings
-            s_source = str(source)
-            s_sink   = str(sink)
+    for source, sink in graph.get_edgelist():
+        ## convert to strings
+        s_source = str(source)
+        s_sink   = str(sink)
 
-            ## create symbolics
-            sym_from = u.make_sym(cache,source)
-            sym_to   = u.make_sym(cache,sink)
+        ## create symbolics
+        sym_from = u.make_sym(cache,source)
+        sym_to   = u.make_sym(cache,sink)
 
-            ## lets go, this is just a fold over the dict yielding ()
-            g.cycle_check(s, sym_from, sym_to, u.make_name(s_source,s_sink))
+        ## lets go, this is just a fold over the dict yielding ()
+        g.cycle_check(s, sym_from, sym_to, u.make_name(s_source,s_sink))
 
     r = []
     if s.check() == z.unsat: r = s.unsat_core()
@@ -59,7 +56,7 @@ def relax(graph, unsat_core, strategy):
     # pprint([source, sink])
     # pprint(list(graph.adj.items()))
     # print("Before: ", nx.to_dict_of_lists(graph))
-    graph.remove_edge(int(source),int(sink))
+    graph.delete_edge(int(source),int(sink))
     # print("After: ", nx.to_dict_of_lists(graph))
 
     return graph
@@ -100,5 +97,7 @@ def run():
     # spin up the solver
     s = z.Solver()
 
-    g = nx.DiGraph(nx.erdos_renyi_graph(5,0.5))
-    return nx.to_dict_of_lists(runWithGraph(cache,s,g))
+    g = ig.Graph.Erdos_Renyi(n=15,p=0.2)
+    newG = runWithGraph(cache,s,g)
+    print(newG.is_dag())
+    return newG

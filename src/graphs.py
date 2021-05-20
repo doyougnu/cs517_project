@@ -9,20 +9,24 @@
 Module which defines sample graphs
 """
 
-import networkx as nx
+import igraph as ig
 
-round_robin_graph = nx.DiGraph({ "A": ["B","C","D","E","F"],
-                                 "B": ["C","F"],
-                                 "C": ["D","E"],
-                                 "D": ["E","F"],
-                                 "E": ["B"],
-                                 "F": ["E","C"]
-                               })
+rrg  = { 0: [1,2,3,4,5],
+         1: [2,5],
+         2: [3,4],
+         3: [4,5],
+         4: [1],
+         5: [4,2]
+        }
 
-anti_greed_graph = nx.DiGraph({ 0: [1],
-                                1: [2,3],
-                                2: [0],
-                                3: [4],
-                                4: [5],
-                                5: [3,2]
-                              })
+round_robin_graph = ig.Graph(edges = [(v, e) for v in rrg.keys() for e in rrg[v]], directed=True)
+
+aag = { 0: [1],
+        1: [2,3],
+        2: [0],
+        3: [4],
+        4: [5],
+        5: [3,2]
+      }
+
+anti_greed_graph = ig.Graph(edges = [(v,e) for v in aag.keys() for e in aag[v]], directed=True)
