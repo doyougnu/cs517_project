@@ -53,11 +53,7 @@ def relax(graph, unsat_core, strategy):
     This function mutates graph
     """
     source, sink = strategy(unsat_core)
-    # pprint([source, sink])
-    # pprint(list(graph.adj.items()))
-    # print("Before: ", nx.to_dict_of_lists(graph))
-    graph.delete_edge(int(source),int(sink))
-    # print("After: ", nx.to_dict_of_lists(graph))
+    u.remove_edge(graph, int(source),int(sink))
 
     return graph
 
@@ -74,7 +70,7 @@ def runWithGraph(cache,s,graph):
         core = find_cycle(cache, s, graph)
 
         # if the core is empty then we are done, if not then relax and recur
-        # print("Core: ", core)
+        print("Core: ", core)
         if core:
             # relax an edge by some strategy
             graph = relax(graph, core, lambda x : x[0])
@@ -97,7 +93,8 @@ def run():
     # spin up the solver
     s = z.Solver()
 
-    g = ig.Graph.Erdos_Renyi(n=15,p=0.2)
+    # g = ig.Graph.Erdos_Renyi(n=15,p=0.2)
+    g = gs.round_robin_graph
     newG = runWithGraph(cache,s,g)
     print(newG.is_dag())
-    return newG
+    return u.edge_to_list_dict(newG)

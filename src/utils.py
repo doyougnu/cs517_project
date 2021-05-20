@@ -41,7 +41,9 @@ def make_sym(cache, new, ty=Int):
 
     return cache, cache[new]
 
-def edge_list_to_dict(g):
+def edge_to_list_dict(g):
+    """ Convert a graph to a dictionary of edges
+    """
     ret = {}
     for source,sink in g.get_edgelist():
         if source not in ret.keys():
@@ -50,3 +52,10 @@ def edge_list_to_dict(g):
         ret[source].append(sink)
 
     return ret
+
+def remove_edge(g,source,sink):
+    """Given an igraph graph, a source vertex and a sink vertex remove the edge
+    connecting the source and the sink from the igraph graph. This function
+    mutates g.
+    """
+    g.delete_edges(g.get_eid(source,sink))
