@@ -23,8 +23,9 @@ import matplotlib.pyplot as plt
 import gadgets as g
 import graphs  as gs
 import utils   as u
+import sgraph  as sg
 
-def symbolize_graph(cache,s,graph):
+def symbolize_graph(sgraph,s,graph):
     """Given a variable cache, a solver object and an igraph graph. Translate every
     edge to a symbolic variable in the solver and return a new cache mapping
     names to symbolics
@@ -33,9 +34,9 @@ def symbolize_graph(cache,s,graph):
 
     ## the cache will only be populated once because symbolic edges will be
     ## relaxes in the solver not in the python layer
-    pprint(u.cache_nodes(cache))
+    pprint(sgraph.s_nodes)
 
-    if not u.cache_nodes(cache):
+    if not sgraph.has_nodes():
         for source, sink in graph.get_edgelist():
             ## convert to strings
             s_source = str(source)
@@ -43,19 +44,18 @@ def symbolize_graph(cache,s,graph):
             s_edge   = u.make_name(s_source,s_sink)
 
             ## create symbolics
-            cache, sym_source = u.make_sym_node(cache,s_source)
-            cache, sym_sink   = u.make_sym_node(cache,s_sink)
-            cache, sym_edge   = u.make_sym_edge(cache,s_edge)
+            sym_source = sgraph.make_sym_node(s_source)
+            sym_sink   = sgraph.make_sym_node(s_sink)
+            sym_edge   = sgraph.make_sym_edge(s_edge)
 
             ## pack the symbolic adjacency list
-            cache = u.add_adjacency(cache,sym_source,sym_sink)
+            sgraph.add_adjacency(sym_source,sym_sink)
+
+    return sgraph
 
 
-    return cache
 
-
-
-def find_all_cycles(ch,s,graph):
+def find_all_cycles(sgraph,s,graph):
     """Find a cycle in a graph. s is a solver object, graph is an igraph object.
     Given the graph iterate over the graph, convert the key and values to
     symbolic terms and check for a cycle. Returns the unsat core as a list of
@@ -63,16 +63,16 @@ def find_all_cycles(ch,s,graph):
     """
 
     ## get the symbolics
-    cache = symbolize_graph(ch,s,graph)
+    sgraph = symbolize_graph(sgraph,s,graph)
 
-    print(cache)
+    print(sgraph)
 
     ## enter new assertion level
     s.push()
     ## we have to use all edges or else this is violated
     # s.add(z.Product(list(u.cache_edges(cache).)) > 0)
     ## We cannot have cycles
-    g.cycle_check(s,cache)
+    g.cycle_check(s,sgraph)
 
     r = []
     print(s.check())
@@ -84,7 +84,7 @@ def find_all_cycles(ch,s,graph):
     return r
 
 
-def runWithGraph(cache,s,graph):
+def runWithGraph(sgraph,s,graph):
     # flag to end loop
     done = False
 
@@ -92,7 +92,7 @@ def runWithGraph(cache,s,graph):
     while not done:
 
         # get the core
-        cores = find_all_cycles(cache, s, graph)
+        cores = find_all_cycles(sgraph, s, graph)
 
         # if the core is empty then we are done, if not then relax and recur
         print("Core: ", cores)
@@ -115,12 +115,12 @@ def runWithGraph(cache,s,graph):
     return graph
 
 def run():
-    cache = u.new_cache()
+    sgraph = sg.SGraph()
 
     # spin up the solver
     s = z.Solver()
 
     g = gs.round_robin_graph
-    newG = runWithGraph(cache,s,g)
+    newG = runWithGraph(sgraph,s,g)
     print(newG.is_dag())
     return u.edge_to_list_dict(newG)

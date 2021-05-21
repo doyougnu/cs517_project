@@ -28,19 +28,6 @@ def parse_core(core):
     """
     return list(map(lambda e: parse_edge(e), core))
 
-def make_sym_(cache,selection, new, ty=Int):
-    """Create a new symbolic variable in the backend solver. We use a cache to
-    avoid repeated calls to the solver. Furthermore, because we are naming
-    constraints we must ensure that we don't accidental use a duplicate name in
-    the solver or else it will throw an exception
-    """
-
-    if new not in cache[selection]:
-        sym_new = ty(str(new))
-        cache[selection][new] = sym_new
-
-    return cache, cache[selection][new]
-
 def edge_to_list_dict(g):
     """ Convert a graph to a dictionary of edges
     """
@@ -62,28 +49,3 @@ def remove_edge(g,source,sink):
 
 def flatten(list_o_lists):
     return [e for sublist in list_o_lists for e in sublist]
-
-def new_cache():
-    return {'s_nodes': {}, 's_edges':{}, 's_adj_list':{}}
-
-def cache_nodes(cache):
-    return cache['s_nodes']
-
-def cache_edges(cache):
-    return cache['s_edges']
-
-def cache_adj_list(cache):
-    return cache['s_adj_list']
-
-def make_sym_node(cache,new,ty=Int):
-    return make_sym_(cache,'s_nodes',new,ty)
-
-def make_sym_edge(cache,new,ty=Int):
-    return make_sym_(cache,'s_edges',new,ty)
-
-def add_adjacency(cache,sym_source,sym_sink):
-    if sym_source not in cache['s_adj_list']:
-        cache['s_adj_list'][sym_source] = [sym_sink]
-    else:
-        cache['s_adj_list'][sym_source].append(sym_sink)
-    return cache
