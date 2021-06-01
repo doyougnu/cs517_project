@@ -10,6 +10,7 @@ Common utility functions
 """
 
 from z3 import *
+from re import split
 
 def make_name(frm,to): return frm + "->" + to
 
