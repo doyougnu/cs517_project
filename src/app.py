@@ -109,8 +109,8 @@ def find_cycles_by_matrices(s,graph):
     """
 
     matrix     = graph.get_adjacency()
-    node_cnt,c = matrix.shape
-    sym_matrix = [[0] * node_cnt] * c
+    n,c = matrix.shape
+    sym_matrix = [[0] * n] * c
 
     def symbolize(i,j):
         s = z.Int('edge_{0}{1}'.format(i,j))
@@ -136,8 +136,18 @@ def find_cycles_by_matrices(s,graph):
     def constraint_3(symbolic, value):
         s.add(symbolic == value)
 
+    def int_formulation(j):
+        left = z.Int("sum_j-1")
+        left = z.Sum([sym_matrix[k][j] for k in range(j-1)])
+
+        right = z.Int("sum_n")
+        right = z.Sum([1 - sym_matrix[j][l] for l in range(j+1,n)])
+
+        return [left, right]
+
+
     ## Iteration for triangle properties
-    for n in range(node_cnt):
+    for n in range(n):
         for k in range(n):
             for j in range(k):
                 for i in range(j):
@@ -147,7 +157,7 @@ def find_cycles_by_matrices(s,graph):
 
     ## constraint 3, every edge must be a 0 or a 1, we get the 0 or 1 directly
     ## from the adjacency matrix
-    for i in range(node_cnt):
+    for i in range(n):
         for j in range(len(matrix[i])):
             s_edge = symbolize(i,j)
             sym_matrix[i][j] = s_edge
@@ -156,8 +166,11 @@ def find_cycles_by_matrices(s,graph):
 
     ## minimization
     o = z.Optimize()
-    ## TODO
-    # o.minimize(z.Sum(s_edges))
+    y = z.Int('y')
+
+    pprint(u.flatten([int_formulation(j) for j in range(n)]))
+    y = z.Sum(u.flatten([int_formulation(j) for j in range(n)]))
+    o.minimize(y)
 
     r = []
     m = []
