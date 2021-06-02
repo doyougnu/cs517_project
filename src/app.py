@@ -108,15 +108,18 @@ def find_cycles_by_matrices(s,graph):
     the graph must be equal to 0.
     """
 
+    ## initialization
     matrix     = graph.get_adjacency()
-    n,c = matrix.shape
+    n, c       = matrix.shape
     sym_matrix = [[0] * n] * c
 
     def symbolize(i,j):
+        "given two indices, create a symbolic variable"
         s = z.Int('edge_{0}{1}'.format(i,j))
         return s
 
     def value_of(i,j):
+        "given two indices, return the (i,j)th value in the adjacency matrix"
         return matrix[i][j]
 
     def constraint_1(i,j,k):
@@ -141,34 +144,34 @@ def find_cycles_by_matrices(s,graph):
         left = z.Sum([sym_matrix[k][j] for k in range(j-1)])
 
         right = z.Int("sum_n")
-        right = z.Sum([1 - sym_matrix[j][l] for l in range(j+1,n)])
+        right = z.Sum([(1 - sym_matrix[j][l]) for l in range(j+1, n)])
 
         return [left, right]
 
 
-    ## Iteration for triangle properties
-    for n in range(n):
-        for k in range(n):
-            for j in range(k):
-                for i in range(j):
-                    constraint_1(i,j,k)
-                    constraint_2(i,j,k)
-
-
     ## constraint 3, every edge must be a 0 or a 1, we get the 0 or 1 directly
     ## from the adjacency matrix
+    ## we do this first so that the sym_matrix is populated
     for i in range(n):
         for j in range(len(matrix[i])):
             s_edge = symbolize(i,j)
             sym_matrix[i][j] = s_edge
             constraint_3(s_edge, matrix[i][j])
 
+    ## Iteration for triangle properties
+    for n_iter in range(n):
+        for k in range(n_iter):
+            for j in range(k-1):
+                for i in range(j-1):
+                    constraint_1(i,j,k)
+                    constraint_2(i,j,k)
+
 
     ## minimization
     o = z.Optimize()
     y = z.Int('y')
 
-    pprint(u.flatten([int_formulation(j) for j in range(n)]))
+    pprint(([int_formulation(j) for j in range(n)]))
     y = z.Sum(u.flatten([int_formulation(j) for j in range(n)]))
     o.minimize(y)
 
@@ -178,6 +181,7 @@ def find_cycles_by_matrices(s,graph):
     done = False
 
     # while not done:
+    print(s.check())
     if s.check() == z.sat:
         m = s.model()
         r.append(m)
@@ -207,7 +211,7 @@ def run():
     # spin up the solver
     s = z.Solver()
 
-    g = gs.anti_greed_graph
+    g = gs.round_robin_graph
     newG = runWithGraph(s,g)
     print("Is new G a Dag? ", newG.is_dag())
     return u.edge_to_list_dict(newG)
