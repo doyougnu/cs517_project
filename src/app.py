@@ -17,6 +17,7 @@ from pprint     import pprint
 from functools  import reduce
 import z3       as z
 import igraph   as ig
+import numpy    as np
 
 import matplotlib.pyplot as plt
 
@@ -109,42 +110,56 @@ def find_cycles_by_matrices(s,graph):
     """
 
     ## initialization
-    matrix     = graph.get_adjacency()
-    n, c       = matrix.shape
-    sym_matrix = [[0] * n] * c
+    matrix      = graph.get_adjacency()
+    n, c        = matrix.shape
+    sym_matrix  = np.empty((n,c), dtype=object)
+    # cost_matrix = np.zeros((n,c))
+    cache       = {}
 
     def symbolize(i,j):
         "given two indices, create a symbolic variable"
         s = z.Int('edge_{0}{1}'.format(i,j))
         return s
 
+
     def value_of(i,j):
         "given two indices, return the (i,j)th value in the adjacency matrix"
-        return matrix[i][j]
+        return sym_matrix[i][j]
 
-    def constraint_1(i,j,k):
+
+    def constraint_1(n,i,j,k):
         y_ij = value_of(i,j)
         y_jk = value_of(j,k)
         y_ik = value_of(i,k)
 
-        s.add((y_ij + y_jk - y_ik) <= 1)
+        name       = "c1" + str((n,i,j,k))
+        constraint = (y_ij + y_jk - y_ik) <= 1
 
-    def constraint_2(i,j,k):
+        # if name not in cache:
+        #     cache[name] = constraint
+        s.assert_and_track(constraint, name)
+
+
+    def constraint_2(n,i,j,k):
         y_ij = value_of(i,j)
         y_jk = value_of(j,k)
         y_ik = value_of(i,k)
 
-        s.add((-y_ij - y_jk + y_ik) <= 0)
+        name       = "c2" + str((n,i,j,k))
+        constraint = (-y_ij - y_jk + y_ik) <= 0
 
-    def constraint_3(symbolic, value):
-        s.add(symbolic == value)
+        # if name not in cache:
+        #     cache[name] = constraint
+        s.assert_and_track(constraint, name)
+
+
+    def constraint_3(symbolic):
+        s.add(z.Or([symbolic == 0, symbolic == 1]))
+
 
     def int_formulation(j):
-        left = z.Int("sum_j-1")
-        left = z.Sum([sym_matrix[k][j] for k in range(j-1)])
-
-        right = z.Int("sum_n")
-        right = z.Sum([(1 - sym_matrix[j][l]) for l in range(j+1, n)])
+        left  = z.Sum([matrix[k][j] * sym_matrix[k][j] for k in range(j)])
+        right = z.Sum([matrix[l][j] * (1 - sym_matrix[j][l]) for l in range(j+1, n)])
 
         return [left, right]
 
@@ -152,66 +167,169 @@ def find_cycles_by_matrices(s,graph):
     ## constraint 3, every edge must be a 0 or a 1, we get the 0 or 1 directly
     ## from the adjacency matrix
     ## we do this first so that the sym_matrix is populated
-    for i in range(n):
-        for j in range(len(matrix[i])):
-            s_edge = symbolize(i,j)
-            sym_matrix[i][j] = s_edge
-            constraint_3(s_edge, matrix[i][j])
-
-    ## Iteration for triangle properties
     for n_iter in range(n):
-        for k in range(n_iter):
-            for j in range(k-1):
-                for i in range(j-1):
-                    constraint_1(i,j,k)
-                    constraint_2(i,j,k)
+        for j in range(n_iter+1):
+            for i in range(j):
+                s_edge           = symbolize(i,j)
+                sym_matrix[i][j] = s_edge
+                constraint_3(s_edge)
+
+    ## Iteration for triangle inequalities
+    for n_iter in range(n):
+        for k in range(n_iter+1):
+            for j in range(k):
+                for i in range(j):
+                    constraint_1(n_iter,i,j,k)
+                    constraint_2(n_iter,i,j,k)
 
 
     ## minimization
     o = z.Optimize()
     y = z.Int('y')
 
-    pprint(([int_formulation(j) for j in range(n)]))
     y = z.Sum(u.flatten([int_formulation(j) for j in range(n)]))
     o.minimize(y)
 
-    r = []
+    # pprint(([int_formulation(j) for j in range(n)]))
+    cores = []
     m = []
 
     done = False
 
     # while not done:
-    print(s.check())
     if s.check() == z.sat:
-        m = s.model()
-        r.append(m)
+        print(s.check())
+        cores = s.model()
     else:
+        cores = s.unsat_core()
         done = True
 
-    return r
+    return cores
+
+
+def find_cycles_set_cover(s,graph):
+    """ TODO
+    """
+
+    ## initialization
+    matrix      = graph.get_adjacency()
+    cycle_matrix = u.gen_cycle_matrix()
+    n, c        = matrix.shape
+    sym_matrix  = np.empty((n,c), dtype=object)
+    # cost_matrix = np.zeros((n,c))
+    cache       = {}
+
+    def symbolize(i,j):
+        "given two indices, create a symbolic variable"
+        s = z.Int('edge_{0}{1}'.format(i,j))
+        return s
+
+
+    def value_of(i,j):
+        "given two indices, return the (i,j)th value in the adjacency matrix"
+        return sym_matrix[i][j]
+
+
+    def constraint_1(n,i,j,k):
+        y_ij = value_of(i,j)
+        y_jk = value_of(j,k)
+        y_ik = value_of(i,k)
+
+        name       = "c1" + str((n,i,j,k))
+        constraint = (y_ij + y_jk - y_ik) <= 1
+
+        # if name not in cache:
+        #     cache[name] = constraint
+        s.assert_and_track(constraint, name)
+
+
+    def constraint_2(n,i,j,k):
+        y_ij = value_of(i,j)
+        y_jk = value_of(j,k)
+        y_ik = value_of(i,k)
+
+        name       = "c2" + str((n,i,j,k))
+        constraint = (-y_ij - y_jk + y_ik) <= 0
+
+        # if name not in cache:
+        #     cache[name] = constraint
+        s.assert_and_track(constraint, name)
+
+
+    def constraint_3(symbolic):
+        s.add(z.Or([symbolic == 0, symbolic == 1]))
+
+
+    def int_formulation(j):
+        left  = z.Sum([matrix[k][j] * sym_matrix[k][j] for k in range(j)])
+        right = z.Sum([matrix[l][j] * (1 - sym_matrix[j][l]) for l in range(j+1, n)])
+
+        return [left, right]
+
+
+    ## constraint 3, every edge must be a 0 or a 1, we get the 0 or 1 directly
+    ## from the adjacency matrix
+    ## we do this first so that the sym_matrix is populated
+    for n_iter in range(n):
+        for j in range(n_iter+1):
+            for i in range(j):
+                s_edge           = symbolize(i,j)
+                sym_matrix[i][j] = s_edge
+                constraint_3(s_edge)
+
+    ## Iteration for triangle inequalities
+    for n_iter in range(n):
+        for k in range(n_iter+1):
+            for j in range(k):
+                for i in range(j):
+                    constraint_1(n_iter,i,j,k)
+                    constraint_2(n_iter,i,j,k)
+
+
+    ## minimization
+    o = z.Optimize()
+    y = z.Int('y')
+
+    y = z.Sum(u.flatten([int_formulation(j) for j in range(n)]))
+    o.minimize(y)
+
+    # pprint(([int_formulation(j) for j in range(n)]))
+    cores = []
+    m = []
+
+    done = False
+
+    # while not done:
+    if s.check() == z.sat:
+        print(s.check())
+        cores = s.model()
+    else:
+        cores = s.unsat_core()
+        done = True
+
+    return cores
+
 
 def runWithGraph(s,graph):
     # flag to end loop
     done = False
 
     # kick off
-    while not done:
+    # while not done:
 
         # get the core
-        cores = find_cycles_by_matrices(s, graph)
+    cores = find_cycles_by_matrices(s, graph)
 
         # if the core is empty then we are done, if not then relax and recur
-        print("Core: ", cores)
+    print("Core: ", cores)
 
-        done = True
+        # done = True
 
-    return graph
+    return cores
 
 def run():
     # spin up the solver
     s = z.Solver()
 
-    g = gs.round_robin_graph
-    newG = runWithGraph(s,g)
-    print("Is new G a Dag? ", newG.is_dag())
-    return u.edge_to_list_dict(newG)
+    g = gs.triangle_cycle
+    return runWithGraph(s,g)

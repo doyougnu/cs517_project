@@ -1,6 +1,6 @@
-with import <nixpkgs> {};
+with import <unstable> {};
 let
-  pythonEnv = python38.withPackages (ps: [
+  pythonEnv = python39.withPackages (ps: [
     ps.numpy
     ps.matplotlib
     ps.toolz
@@ -8,6 +8,7 @@ let
     ps.importmagic
     ps.epc
     ps.python-igraph
+    ps.networkx
     ps.jupyter
     ps.pycairo
   ]);
