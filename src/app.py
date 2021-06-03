@@ -207,107 +207,39 @@ def find_cycles_by_matrices(s,graph):
     return cores
 
 
-def find_cycles_set_cover(s,graph):
+def MFAS_set_cover(s,graph):
     """ TODO
     """
 
     ## initialization
-    matrix      = graph.get_adjacency()
-    cycle_matrix = u.gen_cycle_matrix()
-    n, c        = matrix.shape
-    sym_matrix  = np.empty((n,c), dtype=object)
-    # cost_matrix = np.zeros((n,c))
-    cache       = {}
-
-    def symbolize(i,j):
-        "given two indices, create a symbolic variable"
-        s = z.Int('edge_{0}{1}'.format(i,j))
-        return s
-
-
-    def value_of(i,j):
-        "given two indices, return the (i,j)th value in the adjacency matrix"
-        return sym_matrix[i][j]
-
-
-    def constraint_1(n,i,j,k):
-        y_ij = value_of(i,j)
-        y_jk = value_of(j,k)
-        y_ik = value_of(i,k)
-
-        name       = "c1" + str((n,i,j,k))
-        constraint = (y_ij + y_jk - y_ik) <= 1
-
-        # if name not in cache:
-        #     cache[name] = constraint
-        s.assert_and_track(constraint, name)
-
-
-    def constraint_2(n,i,j,k):
-        y_ij = value_of(i,j)
-        y_jk = value_of(j,k)
-        y_ik = value_of(i,k)
-
-        name       = "c2" + str((n,i,j,k))
-        constraint = (-y_ij - y_jk + y_ik) <= 0
-
-        # if name not in cache:
-        #     cache[name] = constraint
-        s.assert_and_track(constraint, name)
-
-
-    def constraint_3(symbolic):
-        s.add(z.Or([symbolic == 0, symbolic == 1]))
-
-
-    def int_formulation(j):
-        left  = z.Sum([matrix[k][j] * sym_matrix[k][j] for k in range(j)])
-        right = z.Sum([matrix[l][j] * (1 - sym_matrix[j][l]) for l in range(j+1, n)])
-
-        return [left, right]
-
-
-    ## constraint 3, every edge must be a 0 or a 1, we get the 0 or 1 directly
-    ## from the adjacency matrix
-    ## we do this first so that the sym_matrix is populated
-    for n_iter in range(n):
-        for j in range(n_iter+1):
-            for i in range(j):
-                s_edge           = symbolize(i,j)
-                sym_matrix[i][j] = s_edge
-                constraint_3(s_edge)
-
-    ## Iteration for triangle inequalities
-    for n_iter in range(n):
-        for k in range(n_iter+1):
-            for j in range(k):
-                for i in range(j):
-                    constraint_1(n_iter,i,j,k)
-                    constraint_2(n_iter,i,j,k)
+    # matrix      = graph.get_adjacency()
+    cycle_matrix = u.find_all_cycles(graph)
+    # n, c        = matrix.shape
+    # sym_matrix  = np.empty((n,c), dtype=object)
 
 
     ## minimization
-    o = z.Optimize()
-    y = z.Int('y')
+    # o = z.Optimize()
+    # y = z.Int('y')
 
-    y = z.Sum(u.flatten([int_formulation(j) for j in range(n)]))
-    o.minimize(y)
+    # y = z.Sum(u.flatten([int_formulation(j) for j in range(n)]))
+    # o.minimize(y)
 
     # pprint(([int_formulation(j) for j in range(n)]))
-    cores = []
-    m = []
+    # cores = []
+    # m = []
 
-    done = False
+    # done = False
 
-    # while not done:
-    if s.check() == z.sat:
-        print(s.check())
-        cores = s.model()
-    else:
-        cores = s.unsat_core()
-        done = True
+    # # while not done:
+    # if s.check() == z.sat:
+    #     print(s.check())
+    #     cores = s.model()
+    # else:
+    #     cores = s.unsat_core()
+    #     done = True
 
-    return cores
+    return cycle_matrix
 
 
 def runWithGraph(s,graph):
@@ -318,7 +250,7 @@ def runWithGraph(s,graph):
     # while not done:
 
         # get the core
-    cores = find_cycles_by_matrices(s, graph)
+    cores = MFAS_set_cover(s, graph)
 
         # if the core is empty then we are done, if not then relax and recur
     print("Core: ", cores)
@@ -327,9 +259,9 @@ def runWithGraph(s,graph):
 
     return cores
 
-def run():
+def main():
     # spin up the solver
     s = z.Solver()
 
-    g = gs.triangle_cycle
+    g = gs.anti_greed_graph
     return runWithGraph(s,g)

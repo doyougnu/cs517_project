@@ -10,6 +10,8 @@ Common utility functions
 """
 
 from z3 import *
+import networkx as nx
+from numpy import empty
 from re import split
 
 def make_name(frm,to): return frm + "->" + to
@@ -50,3 +52,26 @@ def remove_edge(g,source,sink):
 
 def flatten(list_o_lists):
     return [e for sublist in list_o_lists for e in sublist]
+
+def find_all_cycles(graph):
+    nx_graph = graph.to_networkx()
+    return list(nx.simple_cycles(nx_graph))
+
+def mk_cycle_matrix(edge_list, num_edges):
+    ps          = [pairs(edges) for edges in edge_list]
+    cycle_count = len(edge_list)
+    matrix      = [{}] * cycle_count
+    for i in range(cycle_count):
+        for pair in ps[i]:
+            matrix[i][pair] = 1
+
+    return matrix
+
+def pairs(ls, n = 1):
+    return list(zip(ls, ls[n:] + ls[:n]))
+
+
+
+# [[0, 1, 3, 4, 5, 2], [0, 1, 2], [3, 4, 5]]
+# 0->1, 1->3, 3->4, 4->5, 5->2, 2->0
+# matrix is i X Edges in graph
