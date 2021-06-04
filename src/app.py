@@ -285,5 +285,5 @@ def main():
     # spin up the solver
     s = z.Solver()
 
-    g = gs.round_robin_graph
+    g = gs.anti_greed_graph
     return runWithGraph(s,g)
