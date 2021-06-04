@@ -190,7 +190,6 @@ def find_cycles_by_matrices(s,graph):
     y = z.Sum(u.flatten([int_formulation(j) for j in range(n)]))
     o.minimize(y)
 
-    # pprint(([int_formulation(j) for j in range(n)]))
     cores = []
     m = []
 
@@ -212,34 +211,62 @@ def MFAS_set_cover(s,graph):
     """
 
     ## initialization
-    # matrix      = graph.get_adjacency()
-    cycle_matrix = u.find_all_cycles(graph)
-    # n, c        = matrix.shape
-    # sym_matrix  = np.empty((n,c), dtype=object)
+    m            = graph.ecount()
+    cycle_matrix = u.mk_cycle_matrix(u.find_all_cycles(graph), m)
+    n, c         = graph.get_adjacency().shape
+    num_cycles   = len(cycle_matrix)
+    edge_list    = graph.get_edgelist()
+    cache        = {}
+
+
+    def symbolize(i,j):
+        "given two indices, create a symbolic variable"
+        s = z.Int('edge_{0}{1}'.format(i,j))
+        return s
+
+
+    def constraint_1(i,s_edge):
+        edge = cache[s_edge]
+        value = 0
+        if edge in cycle_matrix[i]:
+            value = cycle_matrix[i][edge]
+
+        return (value * s_edge)
+
+
+    ## symbolize the edges
+    for source,sink in edge_list:
+            s_edge        = symbolize(source, sink)
+            cache[s_edge] = (source,sink)
+
+
+    ## constraint 1
+    s.add(z.Sum([constraint_1(i,s_edge)
+                 for i in range(num_cycles)
+                 for s_edge in cache.keys()]) >= 1)
 
 
     ## minimization
-    # o = z.Optimize()
-    # y = z.Int('y')
+    o = z.Optimize()
+    y = z.Int('y')
 
-    # y = z.Sum(u.flatten([int_formulation(j) for j in range(n)]))
-    # o.minimize(y)
+    ## y can only be a 1 or a 0
+    s.add(z.Or([y == 0, y == 1]))
 
-    # pprint(([int_formulation(j) for j in range(n)]))
-    # cores = []
-    # m = []
+    ## y is the sum of symbolic edges
+    y = z.Sum(list(cache.keys()))
 
-    # done = False
+    ## we want the smallest y possible
+    o.minimize(y)
 
     # # while not done:
-    # if s.check() == z.sat:
-    #     print(s.check())
-    #     cores = s.model()
-    # else:
-    #     cores = s.unsat_core()
-    #     done = True
+    if s.check() == z.sat:
+        cores = s.model()
+    else:
+        cores = s.unsat_core()
+        done = True
 
-    return cycle_matrix
+    return cores
 
 
 def runWithGraph(s,graph):
@@ -252,16 +279,11 @@ def runWithGraph(s,graph):
         # get the core
     cores = MFAS_set_cover(s, graph)
 
-        # if the core is empty then we are done, if not then relax and recur
-    print("Core: ", cores)
-
-        # done = True
-
     return cores
 
 def main():
     # spin up the solver
     s = z.Solver()
 
-    g = gs.anti_greed_graph
+    g = gs.round_robin_graph
     return runWithGraph(s,g)
