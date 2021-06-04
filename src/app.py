@@ -5,7 +5,7 @@
 - Maintainer: youngjef@oregonstate.edu, sheablyc@oregonstate.edu
 - Stability : experimental
 
-Module communicates with the backend solver to solve minimum feedback arc set problems
+Module which encodes the constraints to the solver
 
 You'll notice that we thread the solver instance and cache through several
 functions. This is purposeful to get as close as possible to referential
@@ -21,42 +21,8 @@ import numpy    as np
 
 import matplotlib.pyplot as plt
 
-import gadgets as g
 import graphs  as gs
 import utils   as u
-
-def symbolize_graph(sgraph,s,graph):
-    """Given a variable cache, a solver object and an igraph graph. Translate every
-    edge to a symbolic variable in the solver and return a new cache mapping
-    names to symbolics
-
-    """
-
-    ## the cache will only be populated once because symbolic edges will be
-    ## relaxes in the solver not in the python layer
-    pprint(sgraph.s_nodes)
-
-    if not sgraph.has_nodes():
-        for source, sink in graph.get_edgelist():
-            ## convert to strings
-            s_source = str(source)
-            s_sink   = str(sink)
-            s_edge   = u.make_name(s_source,s_sink)
-
-            ## create symbolics
-            sym_source = sgraph.make_sym_node(s_source)
-            sym_sink   = sgraph.make_sym_node(s_sink)
-            sym_edge   = sgraph.make_sym_edge(s_edge)
-
-            ## pack the symbolic adjacency list
-            sgraph.add_adjacency(sym_source,sym_sink)
-
-    return sgraph
-
-def relax(solver, sgraph, core, strategy):
-    s_edge = u.parse_edge(strategy(core))
-    solver.add(s_edge == 0)
-
 
 def find_all_cycles(s,graph):
     """Find a cycle in a graph. s is a solver object, graph is an igraph object.
@@ -102,11 +68,12 @@ def find_all_cycles(s,graph):
 
     return r
 
-def find_cycles_by_matrices(s,graph):
+def find_topo_order(s,graph):
     """Define two matrices, one for weights and one for (i,j) pairs. If i comes
     before j then leave (i,j) greater than 0 but unbound, when we want to relax
     an edge we set it to 1. Then add a constraint that the sum of every edge in
-    the graph must be equal to 0.
+    the graph must be equal to 0, thus any edge constrained to be 1 cannot be
+    considered and the solver makes progess.
     """
 
     ## initialization
@@ -190,24 +157,33 @@ def find_cycles_by_matrices(s,graph):
     y = z.Sum(u.flatten([int_formulation(j) for j in range(n)]))
     o.minimize(y)
 
-    cores = []
-    m = []
+    result = []
 
-    done = False
-
-    # while not done:
     if s.check() == z.sat:
-        print(s.check())
-        cores = s.model()
-    else:
-        cores = s.unsat_core()
-        done = True
+        result = s.model()
 
-    return cores
+    return result
 
 
 def MFAS_set_cover(s,graph):
-    """ TODO
+    """Find the minimum feedback arc set by encoding it as a minimum set cover.
+    The encoding requires a cycle matrix which we find externally to the SAT
+    solver. Then given the cycle matrix we do the following encoding:
+
+    Variables:
+      - m is |E|
+      - w_{j} is the weight of edge j \in E
+      - y_{j} is a symbolic edge; y_{j} = 1 if edge j is in the feedback edge set and 0 otherwise
+      - a is the cycle matrix
+      - a_{ij} is the value of edge j in cycle i; a_{ij} = 1 if j participates, 0 otherwise
+
+
+    minimize(sum{j = 1}^{m}(w_{j} * y_{j}))
+
+      subject to:
+
+    sum_{j = 1}^{m}(a_{ij} * y_{j}) >= 1
+    \forall i. y_{i} \in {0,1}
     """
 
     ## initialization
@@ -216,18 +192,22 @@ def MFAS_set_cover(s,graph):
     n, c         = graph.get_adjacency().shape
     num_cycles   = len(cycle_matrix)
     edge_list    = graph.get_edgelist()
-    cache        = {}
+    sym_to_edge_cache = {}
+    edge_to_sym_cache = {}
+    sum_var      = 'y'
 
 
     def symbolize(i,j):
         "given two indices, create a symbolic variable"
-        s = z.Int('edge_{0}{1}'.format(i,j))
+        s = z.Int('{0}->{1}'.format(i,j))
         return s
 
 
     def constraint_1(i,s_edge):
-        edge = cache[s_edge]
-        value = 0
+        """ Multiply the edge by its corresponding value in the cycle matrix
+        """
+        edge = sym_to_edge_cache[s_edge]
+        value = 1
         if edge in cycle_matrix[i]:
             value = cycle_matrix[i][edge]
 
@@ -237,49 +217,68 @@ def MFAS_set_cover(s,graph):
     ## symbolize the edges
     for source,sink in edge_list:
             s_edge        = symbolize(source, sink)
-            cache[s_edge] = (source,sink)
+            sym_to_edge_cache[s_edge] = (source,sink)
+            edge_to_sym_cache[(source,sink)] = s_edge
 
 
-    ## constraint 1
+    ## Perform constraint 1 and add it to the solver instance
     s.add(z.Sum([constraint_1(i,s_edge)
                  for i in range(num_cycles)
-                 for s_edge in cache.keys()]) >= 1)
+                 for s_edge in sym_to_edge_cache.keys()]) >= 1)
 
 
-    ## minimization
+    ## minimization, we just use the variable y to represent the minimized
+    ## summation
     o = z.Optimize()
-    y = z.Int('y')
+    y = z.Int(sum_var)
 
     ## y can only be a 1 or a 0
     s.add(z.Or([y == 0, y == 1]))
 
     ## y is the sum of symbolic edges
-    y = z.Sum(list(cache.keys()))
+    y = z.Sum(list(sym_to_edge_cache.keys()))
+
+    ## add that y cannot be more than the number of edges
+    s.add(y <= m)
 
     ## we want the smallest y possible
     o.minimize(y)
 
-    # # while not done:
-    if s.check() == z.sat:
-        cores = s.model()
-    else:
-        cores = s.unsat_core()
-        done = True
+    model = []
+    bad_edge_set = []
+    done  = False
 
-    return cores
+    ## iteration for new models
+    while not graph.is_dag():
+        if s.check() == z.sat:
+            model = s.model()
+            print(model)
+            bad_edges  = list(filter(lambda x : model[x].as_long() == 1 and x.__str__() != sum_var, model))
+
+            print(bad_edges)
+            for s_edge in bad_edges:
+                bad_edge_set.append(s_edge)
+                i, j = u.parse_edge(s_edge)
+
+                ## drive the solver to other edges
+                s.add(edge_to_sym_cache[i,j] ==  0)
+
+                ## delete the edge in the concrete graph
+                ## this deletion is a side effect because of course
+                u.remove_edge(graph,i,j)
+
+
+        else:
+            done = True
+
+    return bad_edge_set
 
 
 def runWithGraph(s,graph):
-    # flag to end loop
-    done = False
-
     # kick off
-    # while not done:
+    result = MFAS_set_cover(s, graph)
 
-        # get the core
-    cores = MFAS_set_cover(s, graph)
-
-    return cores
+    return result
 
 def main():
     # spin up the solver
