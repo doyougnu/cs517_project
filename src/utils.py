@@ -51,6 +51,7 @@ def remove_edge(g,source,sink):
     """
     g.delete_edges(g.get_eid(source,sink))
 
+
 def flatten(list_o_lists):
     return [e for sublist in list_o_lists for e in sublist]
 
@@ -67,14 +68,19 @@ def pairs(ls, n = 1):
 def mk_cycle_matrix(cycle_edge_list, num_edges):
     ps          = [pairs(edges) for edges in cycle_edge_list]
     cycle_count = len(cycle_edge_list)
-    matrix      = [{}] * cycle_count
+    matrix      = []
     for i in range(cycle_count):
+        cycle = {}
         for pair in ps[i]:
-            matrix[i][pair] = 1
+            cycle[pair] = 1
+
+        matrix.append(cycle)
 
     return matrix
 
-
+def get_feedback_arc_set(graph):
+    fas = graph.feedback_arc_set(method="ip")
+    return list(map(lambda x : graph.es[x].tuple, fas))
 
 # [[0, 1, 3, 4, 5, 2], [0, 1, 2], [3, 4, 5]]
 # 0->1, 1->3, 3->4, 4->5, 5->2, 2->0

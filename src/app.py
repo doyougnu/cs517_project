@@ -199,15 +199,15 @@ def MFAS_set_cover(s,graph):
 
     def symbolize(i,j):
         "given two indices, create a symbolic variable"
-        s = z.Int('{0}->{1}'.format(i,j))
-        return s
+        new = z.Int('{0}->{1}'.format(i,j))
+        return new
 
 
     def constraint_1(i,s_edge):
         """ Multiply the edge by its corresponding value in the cycle matrix
         """
-        edge = sym_to_edge_cache[s_edge]
-        value = 1
+        edge  = sym_to_edge_cache[s_edge]
+        value = 0
         if edge in cycle_matrix[i]:
             value = cycle_matrix[i][edge]
 
@@ -216,65 +216,30 @@ def MFAS_set_cover(s,graph):
 
     ## symbolize the edges
     for source,sink in edge_list:
-            s_edge        = symbolize(source, sink)
-            sym_to_edge_cache[s_edge] = (source,sink)
+            s_edge                           = symbolize(source, sink)
+            ## an edge is either a 0 or a 1
+            s.add(z.Or([s_edge == 0, s_edge == 1]))
+
+            sym_to_edge_cache[s_edge]        = (source,sink)
             edge_to_sym_cache[(source,sink)] = s_edge
 
 
     ## Perform constraint 1 and add it to the solver instance
-    s.add(z.Sum([constraint_1(i,s_edge)
-                 for i in range(num_cycles)
-                 for s_edge in sym_to_edge_cache.keys()]) >= 1)
+    for i in range(num_cycles):
+        s.add(z.Sum([constraint_1(i,s_edge)
+                     for s_edge in sym_to_edge_cache.keys()]) >= 1)
 
-
-    ## minimization, we just use the variable y to represent the minimized
-    ## summation
-    o = z.Optimize()
-    y = z.Int(sum_var)
-
-    ## y can only be a 1 or a 0
-    s.add(z.Or([y == 0, y == 1]))
-
-    ## y is the sum of symbolic edges
-    y = z.Sum(list(sym_to_edge_cache.keys()))
-
-    ## add that y cannot be more than the number of edges
-    s.add(y <= m)
 
     ## we want the smallest y possible
-    o.minimize(y)
+    s.minimize(z.Sum([s_edge for s_edge in sym_to_edge_cache.keys()]))
 
-    model = []
-    bad_edge_set = []
-    done  = False
-
-    ## iteration for new models
-    while not graph.is_dag():
-        if s.check() == z.sat:
-            model = s.model()
-            bad_edges  = list(filter(lambda x : model[x].as_long() == 1 and x.__str__() != sum_var, model))
-
-            for s_edge in bad_edges:
-                bad_edge_set.append(s_edge)
-                i, j = u.parse_edge(s_edge)
-
-                ## drive the solver to other edges
-                s.add(edge_to_sym_cache[i,j] ==  0)
-
-                ## delete the edge in the concrete graph
-                ## this deletion is a side effect because of course
-                u.remove_edge(graph,i,j)
-
-
-        else:
-            done = True
-
-    return bad_edge_set
+    s.check()
+    return s.model()
 
 
 def runWithGraph(graph):
-    s = z.Solver()
-    return MFAS_set_cover(s, graph)
+    s = z.Optimize()
+    return MFAS_set_cover(s, graph), u.get_feedback_arc_set(graph)
 
 
 def runErdosRenyi(n,p):
@@ -282,9 +247,9 @@ def runErdosRenyi(n,p):
     feedback arc set of an erdos-renyi graph
 
     """
-    s = z.Solver()
+    s = z.Optimize()
     g = ig.Graph.Erdos_Renyi(n, p, directed=True, loops=True)
-    return MFAS_set_cover(s,g), g.feedback_arc_set()
+    return MFAS_set_cover(s,g), u.get_feedback_arc_set(g)
 
 
 def runWattsStrogatz(dim, size, nei, p):
@@ -294,9 +259,9 @@ def runWattsStrogatz(dim, size, nei, p):
     watts-strogatz graph
 
     """
-    s = z.Solver()
+    s = z.Optimize()
     g = ig.Graph.Watts_Strogatz(dim, size, nei, p, loops=True, multiple=False)
-    return MFAS_set_cover(s,g), g.feedback_arc_set()
+    return MFAS_set_cover(s,g), u.get_feedback_arc_set(g)
 
 ############################# Benchmarks #####################################
 def test_erdos_renyi(benchmark):
