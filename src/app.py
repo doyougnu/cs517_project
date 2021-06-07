@@ -269,17 +269,29 @@ def MFAS_set_cover(s,graph):
     return cores
 
 
-def runWithGraph(s,graph):
-    # flag to end loop
-    done = False
+def runWithGraph(graph):
+    s = z.Solver()
+    return MFAS_set_cover(s, graph)
 
-    # kick off
-    # while not done:
+def runErdosRenyi(n,p):
+    """Given n vertices and a probability, p of edges. Find the minimum
+    feedback arc set of an erdos-renyi graph
 
-        # get the core
-    cores = MFAS_set_cover(s, graph)
+    """
+    s = z.Solver()
+    g = ig.Graph.Erdos_Renyi(n, p, directed=True, loops=True)
+    return MFAS_set_cover(s,g)
 
-    return cores
+def runWattsStrogatz(dim, size, nei, p):
+    """Given the dimension of the lattice, size of the lattice along all
+    dimensions, the number of steps within which two vertices are connected
+    (nei), and the probability p, find the minimum feedback arc set of a
+    watts-strogatz graph
+
+    """
+    s = z.Solver()
+    g = ig.Graph.Watts_Strogatz(d, s, nei, p, directed=True, loops=True)
+    return MFAS_set_cover(s,g)
 
 def main():
     # spin up the solver

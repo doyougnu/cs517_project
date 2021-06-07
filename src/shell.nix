@@ -11,6 +11,8 @@ let
     ps.networkx
     ps.jupyter
     ps.pycairo
+    ps.pytest
+    ps.pytest-benchmark
   ]);
 in mkShell {
   buildInputs = [
