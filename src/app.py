@@ -20,6 +20,8 @@ import igraph   as ig
 import numpy    as np
 
 import matplotlib.pyplot as plt
+import timeit
+from tqdm import tqdm
 
 import graphs  as gs
 import utils   as u
@@ -272,3 +274,26 @@ def runWattsStrogatz(dim, size, nei, p):
 ############################# Benchmarks #####################################
 def test_erdos_renyi(benchmark):
     benchmark(runErdosRenyi(10,0.2))
+
+
+def plot_data(x, y, z):
+    pass
+
+
+if __name__ == "__main__":
+    ns = np.linspace(5, 100, 10, True, False, int)
+    ps = np.linspace(0.2, 1, 10)
+    xs = []
+    ys = []
+    zs = []
+    for n in tqdm(ns):
+        for p in ps:
+            t = timeit.Timer(lambda: runErdosRenyi(n, p))
+            xs.append(n)
+            ys.append(p)
+            zs.append(t.timeit(5))
+
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
+    ax.plot(xs, ys, zs)
+    plt.show()
