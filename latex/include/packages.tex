@@ -21,6 +21,7 @@
 \usepackage{enumitem}                %% For better enumerate environment
 \setlist[description]{leftmargin=\parindent,labelindent=\parindent}
 \usepackage{caption}
+\usepackage{multirow}                %% for multiple rows in tables
 \usepackage{tikz}                    %% math visualizations
 \usetikzlibrary{matrix}
 \usetikzlibrary{arrows.meta}
@@ -35,6 +36,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Packages Configs %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \graphicspath{ {./Figures/} }
+\raggedbottom
 
 \theoremstyle{definition}
 \newtheorem{theorem}{Theorem}[section]
@@ -42,6 +44,8 @@
 \newtheorem{corollary}{Corollary}[theorem]
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem*{analysis}{Analysis}
+
+\DeclareMathOperator*{\minimize}{minimize}
 
 \SetKwInOut{Input}{Input}                % Set the Input
 \SetKwInOut{Output}{Output}              % set the Output
