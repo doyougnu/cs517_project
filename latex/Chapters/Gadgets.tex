@@ -1,16 +1,5 @@
 \label{section:gadgets}
 %
-\begin{figure}[h]
-  \centering
-  \begin{lstlisting}[language=python,caption={Cycle check gadget. \texttt{v\_from}
-  and \texttt{v\_to} are symbolic variables in the solver. \texttt{name} is the constraint
-  label in the solver. The cycle check replaces each edge with the constraint
-  that previous vertices must be a lesser integer value than future vertices}]
-  def cycle_check(solver,v_from,v_to,name):
-      solver.assert_and_track(v_from < v_to, name)
-  \end{lstlisting}
-\end{figure}
-
 Our approach is to translate an exact integer programming method by
 \citet{alietall} to an \ac{smt} problem. The translation to an \ac{smt} problem
 is straightforward, requiring no changes from linear program encoding to an
@@ -86,6 +75,7 @@ with the edge and cycle IDs shown in \autoref{table}:
     \hline
   \end{tabular}%
 \end{subtable}
+\vspace{2ex}
 \caption{Table of Edge IDs and Cycle IDs for \autoref{fig:three-cycle}}%
 \label{table}%
 \end{table}
