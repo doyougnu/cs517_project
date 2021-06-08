@@ -249,6 +249,9 @@ def runErdosRenyi(n,p):
     """
     s = z.Optimize()
     g = ig.Graph.Erdos_Renyi(n, p, directed=True, loops=True)
+    while g.is_dag():
+        g = ig.Graph.Erdos_Renyi(n, p, directed=True, loops=True)
+
     return MFAS_set_cover(s,g), u.get_feedback_arc_set(g)
 
 
@@ -261,6 +264,9 @@ def runWattsStrogatz(dim, size, nei, p):
     """
     s = z.Optimize()
     g = ig.Graph.Watts_Strogatz(dim, size, nei, p, loops=True, multiple=False)
+    while g.is_dag():
+        g = ig.Graph.Watts_Strogatz(dim, size, nei, p, loops=True, multiple=False)
+
     return MFAS_set_cover(s,g), u.get_feedback_arc_set(g)
 
 ############################# Benchmarks #####################################
