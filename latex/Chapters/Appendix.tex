@@ -1,132 +1,133 @@
 Source code listings
 
 \begin{lstlisting}[language=python]
-"""- Module    : app.py
-- Copyright : (c) Jeffrey M. Young
-            ; (c) Colin Shea-Blymyer
-- License   : BSD3
-- Maintainer: youngjef@oregonstate.edu, sheablyc@oregonstate.edu
-- Stability : experimental
-
-Module communicates with the backend solver to solve minimum feedback arc set problems
-
-You'll notice that we thread the solver instance and cache through several
-functions. This is purposeful to get as close as possible to referential
-transparency in python. Think of it as a Reader Monad carrying the cache and
-solver handle.
-
-"""
-
-from pprint import pprint
-from copy   import deepcopy
-import z3   as z
-
-import gadgets as g
-import graphs  as gs
-import utils   as u
-
-
-def find_cycle(cache,s,graph):
-    """Find a cycle in a graph. s is a solver object, graph is an adjacency list
-    e.g. {0:[0,1,2,3,4,5], 1:[2,3] ...}. Given the graph iterate over the
-    graph, convert the key and values to symbolic terms and check for a cycle.
-    Returns the unsat core as a list of strings e.g. [1->2, 2->3, 3->4, 4->1]
-    """
-    for source, sinks in graph.items():
-        for sink in sinks:
-            ## convert to strings
-            s_source = str(source)
-            s_sink   = str(sink)
-
-            ## create symbolics
-            sym_from = u.make_sym(cache,source)
-            sym_to   = u.make_sym(cache,sink)
-
-            ## lets go, this is just a fold over the dict yielding ()
-            g.cycle_check(s, sym_from, sym_to, u.make_name(s_source,s_sink))
-
-    r = []
-    if s.check() == z.unsat: r = s.unsat_core()
-    return u.parse_core(r)
-
-def relax(graph, unsat_core, strategy):
-    """Take a graph, an unsat-core and a strategy. use the strategy to find the
-    edge to relax, relatx the edge and return the graph
-
-    This function mutates graph
-    """
-    source, sink = strategy(unsat_core)
-    outgoing = deepcopy(graph[source])
-    print(graph[source])
-    print(outgoing)
-    print(sink in outgoing)
-    print(outgoing.remove(sink))
-    graph[source] = outgoing.remove(sink)
-    if graph[source] is None: graph[source] = []
-
-def go (cache,s,graph):
-    # flag to end loop
-    done = False
-
-    # kick off
-    while not done:
-        pprint(graph)
-
-        # get the core
-        core = find_cycle(cache, s, graph)
-        pprint(core)
-
-        # if the core is empty then we are done, if not then relax and recur
-        if core:
-            # relax an edge by some strategy
-            relax(graph,core,lambda x : x[0])
-
-            # this is good enough for now but in the future we should try to
-            # remove only the right constraint, which will be much much faster
-            s.reset()
-        else:
-            done = True
-
-
-def main():
-    # just use a heterogeneous map as a cache
-    cache = {}
-
-    # spin up the solver
-    s = z.Solver()
-
-    go(cache,s,gs.round_robin_graph)
-\end{lstlisting}
-
-\newpage
-\begin{lstlisting}[language=python]
-  """
-  - Module    : graphs.py
+  """- Module    : app.py
   - Copyright : (c) Jeffrey M. Young
   ; (c) Colin Shea-Blymyer
   - License   : BSD3
   - Maintainer: youngjef@oregonstate.edu, sheablyc@oregonstate.edu
   - Stability : experimental
 
-  Module which defines sample graphs
   """
 
+  from pprint     import pprint
+  from functools  import reduce
+  import z3       as z
+  import igraph   as ig
+  import numpy    as np
 
-  round_robin_graph = { "A": ["B","C","D","E","F"],
-                      "B": ["C","F"],
-                      "C": ["D","E"],
-                      "D": ["E","F"],
-                      "E": ["B"],
-                      "F": ["E","C"]
-                    }
+  import matplotlib.pyplot as plt
+  import timeit
+  from tqdm import tqdm
 
-  anti_greed_graph = { 0: [1],
-                     1: [2,3],
-                     2: [0],
-                     3: [4],
-                     4: [5],
-                     5: [3,2]
-  }
+  import graphs  as gs
+  import utils   as u
+
+def MFAS_set_cover(s,graph):
+    """Find the minimum feedback arc set by encoding it as a minimum set cover.
+    The encoding requires a cycle matrix which we find externally to the SAT
+    solver. Then given the cycle matrix we do the following encoding:
+
+    Variables:
+      - m is |E|
+      - w_{j} is the weight of edge j \in E (we don't implement the weight matrix)
+      - y_{j} is a symbolic edge; y_{j} = 1 if edge j is in the feedback edge set and 0 otherwise
+      - a is the cycle matrix
+      - a_{ij} is the value of edge j in cycle i; a_{ij} = 1 if j participates, 0 otherwise
+
+
+    minimize(sum{j = 1}^{m}(w_{j} * y_{j}))
+
+      subject to:
+
+    sum_{j = 1}^{m}(a_{ij} * y_{j}) >= 1
+    \forall i. y_{i} \in {0,1}
+    """
+
+    ## initialization
+    m            = graph.ecount()
+    cycle_matrix = u.mk_cycle_matrix(u.find_all_cycles(graph), m)
+    n, c         = graph.get_adjacency().shape
+    num_cycles   = len(cycle_matrix)
+    edge_list    = graph.get_edgelist()
+    sym_to_edge_cache = {}
+    edge_to_sym_cache = {}
+    sum_var      = 'y'
+
+
+    def symbolize(i,j):
+        "given two indices, create a symbolic variable"
+        new = z.Int('{0}->{1}'.format(i,j))
+        return new
+
+
+    def constraint_1(i,s_edge):
+        """ Multiply the edge by its corresponding value in the cycle matrix
+        """
+        edge  = sym_to_edge_cache[s_edge]
+        value = 0
+        if edge in cycle_matrix[i]:
+            value = cycle_matrix[i][edge]
+
+        return (value * s_edge)
+
+
+    ## symbolize the edges
+    for source,sink in edge_list:
+            s_edge                           = symbolize(source, sink)
+            ## an edge is either a 0 or a 1
+            s.add(z.Or([s_edge == 0, s_edge == 1]))
+
+            sym_to_edge_cache[s_edge]        = (source,sink)
+            edge_to_sym_cache[(source,sink)] = s_edge
+
+
+    ## Perform constraint 1 and add it to the solver instance
+    for i in range(num_cycles):
+        s.add(z.Sum([constraint_1(i,s_edge)
+                     for s_edge in sym_to_edge_cache.keys()]) >= 1)
+
+
+    ## we want the smallest y possible
+    s.minimize(z.Sum([s_edge for s_edge in sym_to_edge_cache.keys()]))
+
+    s.check()
+    return s.model()
+\end{lstlisting}
+
+
+\newpage
+\begin{lstlisting}[language=python]
+  def runWithGraph(graph):
+  s = z.Optimize()
+  return MFAS_set_cover(s, graph), u.get_feedback_arc_set(graph)
+
+
+  def runErdosRenyi(n,p):
+  """Given n vertices and a probability, p of edges. Find the minimum
+  feedback arc set of an erdos-renyi graph
+
+  """
+  s = z.Optimize()
+  g = ig.Graph.Erdos_Renyi(n, p, directed=True, loops=True)
+  while g.is_dag():
+  g = ig.Graph.Erdos_Renyi(n, p, directed=True, loops=True)
+
+  return MFAS_set_cover(s,g), u.get_feedback_arc_set(g)
+
+  def runWattsStrogatz(dim, size, nei, p):
+  """Given the dimension of the lattice, size of the lattice along all
+  dimensions, the number of steps within which two vertices are connected
+  (nei), and the probability p, find the minimum feedback arc set of a
+  watts-strogatz graph
+
+  """
+  s = z.Optimize()
+  g = ig.Graph.Watts_Strogatz(dim, size, nei, p, loops=True, multiple=False)
+  while g.is_dag():
+  g = ig.Graph.Watts_Strogatz(dim, size, nei, p, loops=True, multiple=False)
+
+  return MFAS_set_cover(s,g), u.get_feedback_arc_set(g)
 \end{lstlisting}
 
 \newpage
@@ -143,12 +144,16 @@ Common utility functions
 """
 
 from z3 import *
+import networkx as nx
+from numpy import empty
+from re import split
 
 def make_name(frm,to): return frm + "->" + to
 
 def parse_edge(edge): # return list(map(int,edge.__str__().split("->")))
     str_edge = edge.__str__()
-    return list(map(lambda x: x,str_edge.split("->")))
+    inner    = list(map(lambda x: x, str_edge.split("->")))
+    return tuple(map(lambda x : int(x), inner))
 
 def parse_core(core):
     """Parse an unsat core. An unsat core is shallowly embedded as a list of z3
@@ -161,16 +166,53 @@ def parse_core(core):
     """
     return list(map(lambda e: parse_edge(e), core))
 
-def make_sym(cache, new, ty=Int):
-    """Create a new symbolic variable in the backend solver. We use a cache to
-    avoid repeated calls to the solver. Furthermore, because we are naming
-    constraints we must ensure that we don't accidental use a duplicate name in
-    the solver or else it will throw an exception
+def edge_to_list_dict(g):
+    """ Convert a graph to a dictionary of edges
     """
+    ret = {}
+    for source,sink in g.get_edgelist():
+        if source not in ret.keys():
+            ret[source] = []
 
-    if new not in cache:
-        sym_new = ty(str(new))
-        cache[new] = sym_new
+        ret[source].append(sink)
 
-    return cache, cache[new]
+    return ret
+
+def remove_edge(g,source,sink):
+    """Given an igraph graph, a source vertex and a sink vertex remove the edge
+    connecting the source and the sink from the igraph graph. This function
+    mutates g.
+    """
+    g.delete_edges(g.get_eid(source,sink))
+
+
+def flatten(list_o_lists):
+    return [e for sublist in list_o_lists for e in sublist]
+
+
+def find_all_cycles(graph):
+    nx_graph = graph.to_networkx()
+    return list(nx.simple_cycles(nx_graph))
+
+
+def pairs(ls, n = 1):
+    return list(zip(ls, ls[n:] + ls[:n]))
+
+
+def mk_cycle_matrix(cycle_edge_list, num_edges):
+    ps          = [pairs(edges) for edges in cycle_edge_list]
+    cycle_count = len(cycle_edge_list)
+    matrix      = []
+    for i in range(cycle_count):
+        cycle = {}
+        for pair in ps[i]:
+            cycle[pair] = 1
+
+        matrix.append(cycle)
+
+    return matrix
+
+def get_feedback_arc_set(graph):
+    fas = graph.feedback_arc_set(method="ip")
+    return list(map(lambda x : graph.es[x].tuple, fas))
 \end{lstlisting}
