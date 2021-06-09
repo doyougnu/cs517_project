@@ -1,34 +1,27 @@
 \label{section:case-studies}
-
+%
 To evaluate this approach, we construct a prototype \ac{smt}-enabled algorithm
 and assess the prototype on Erd\H{o}s-R\'{e}nyi graphs. Erd\H{o}s-R\'{e}nyi
 graphs are generated according to two parameters: $\kf{p}$, a metric of
 connectedness for the graph, and $\kf{k}$ is the number of vertices in the
-graph. In addition, we add a parameter $\kf{s}$ which represents the size of the
-range of possible weights on edges in a graph.
+graph.
 
 With these parameters we employ random generation to construct sample graphs. We
-are interested in the individual effect $\kf{k}$, $\kf{p}$ and $\kf{s}$ have on
-runtime, in addition to the interactions effects between each parameter.
-Consider the case where $\kf{p}$ and $\kf{k}$ are left unbound, yet $\kf{s}$ is
-set to 1. This is the specific case where solving the minimum weighted feedback
-arc set problem solves the minimum feedback arc set problem. Thus, by setting
-$\kf{s}$ to 1 we generate graphs to solve the minimum feedback arc set problem.
-Consider the case where $\kf{s}$ is larger than one. In this case, edges must
-possess positive weights and the weighted minimum feedback arc set may be
-different than the minimum feedback arc set.
+are interested in the individual effect $\kf{k}$ and $\kf{p}$ have on runtime,
+in addition to the interactions effects between each parameter. Consider the
+case where $\kf{p}$ and $\kf{k}$ are left unbound, yet $\kf{s}$ is set to 1.
+This is the specific case where solving the minimum weighted feedback arc set
+problem solves the minimum feedback arc set problem. Thus, by setting $\kf{s}$
+to 1 we generate graphs to solve the minimum feedback arc set problem. Consider
+the case where $\kf{s}$ is larger than one. In this case, edges must possess
+positive weights and the weighted minimum feedback arc set may be different than
+the minimum feedback arc set.
 
-\NOTE{Hi Mike. The rest of the section is describing each case individually and
-  then research questions. We don't have these spelled out right now. What we
-  hypothesize is that at some combination of $\kf{k}$, $\kf{p}$ and $\kf{s}$ the
-  solver runtime will become infeasible. Then we can make determinations on the
-  viability of this method in different domains. For example, most tournaments
-  will be a bounded number of participants, and score ranges, but may have
-  maximum connectivity. Thus, we would be able to make a conclusion on the
-  viability of our method for the tournament domain. As a stretch goal we wish
-  to consider graphs of different distributions that Erd\H{o}s-R\'{e}nyi, \eg{}
-  Barab\'{a}si-Albert or Watts and Strogatz.}
-
+We provide the complete prototype implementation in
+\autoref{appendix:source-code-listings}. To ensure correctness we compared
+results from the \ac{smt} routine to a built in method in the python library
+\lstinline{igraph} which finds the minimum feedback arc set. We observed no
+differences between both methods.
 
 
 %%% Local Variables:
