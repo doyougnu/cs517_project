@@ -1,14 +1,15 @@
 \label{section:results-and-discussion}
-
-It was good enough to graduate
-
-\begin{figure*}[t]
+%
+\begin{figure}[t]
     \centering
-    \includegraphics[width=1\textwidth]{latex/Figures/big_ol_cliff.pdf}
-    \caption{A three cycle graph which demonstrates that greedily selecting the
-      minimum weighted edge will not provide the minimum feedback arc set.}%
-    \label{fig:three-cycle}
-\end{figure*}%
+    \includegraphics[width=1\linewidth]{Figures/big_ol_cliff.pdf}
+    \caption{Results of the \ac{smt} encoding on randomly generated
+      Erd\H{o}s-R\'{e}nyi graphs. The z-axis is runtime in minutes, with
+      connectivity on the y-axis and vertex count on the x-axis. We see that
+      runtime explodes at an interaction point between vertex count and
+      connectivity.}%
+    \label{fig:results}
+\end{figure}%
 
 %%% Local Variables:
 %%% mode: latex
