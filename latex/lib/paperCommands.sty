@@ -4,7 +4,7 @@
 % Macros defined just for this paper
 %
 \ProvidesPackage{lib/paperCommands}
-\RequirePackage[colorinlistoftodos,prependcaption,textwidth=4.5em,textsize=small]{todonotes}
+\RequirePackage[textwidth=4.5em,textsize=small]{todonotes}
 \setlength{\marginparwidth}{4.5em}
 
 %%%%%%%%%%%%%%
@@ -36,6 +36,25 @@
 
 %%%%%%%%%%%%%%%%%% Problem Descriptions
 \newcommand{\problem}[1]{{\color{Gray} Problem Description: \newline{} #1}}
+
+%%%%%%%%%%%%%%%%%%%% background example helpers
+\newcommand{\mkVar}[1]{\ensuremath{\kf{#1}}}
+\newcommand{\pV}{\mkVar{p}}
+\newcommand{\qV}{\mkVar{q}}
+\newcommand{\rV}{\mkVar{r}}
+\newcommand{\fV}{\mkVar{f}}
+\newcommand{\gV}{\mkVar{g}}
+\newcommand{\iV}{\mkVar{i}}
+\newcommand{\aV}{\mkVar{a}}
+\newcommand{\bV}{\mkVar{b}}
+\newcommand{\cV}{\mkVar{c}}
+\newcommand{\dV}{\mkVar{d}}
+\newcommand{\eV}{\mkVar{e}}
+\newcommand{\sV}{\mkVar{s}}
+\newcommand{\tV}{\mkVar{t}}
+\newcommand{\zV}{\mkVar{z}}
+\newcommand{\AV}{\mkVar{A}}
+\newcommand{\BV}{\mkVar{B}}
 
 %%%%%%%%%%%%%%%%%%% Relational algebra symbols
 

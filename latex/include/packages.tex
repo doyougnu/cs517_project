@@ -13,21 +13,22 @@
 \usepackage[nolist]{acronym}
 \usepackage{hyperref}                %% for auto references
 \usepackage{xpunctuate}              %% for punctuation's after macros
-\usepackage{cite}                    %% for bibliography ranges
+% \usepackage{cite}                    %% for bibliography ranges
 \usepackage{subcaption}              %% For complex figures with subfigures/subcaptions
 \usepackage{wrapfig}                 %% wrapping figures around text
 \usepackage{listings}                %% for source code lstlisting
-% \usepackage[dvipsnames]{xcolor}      %% For listings and better colors
-\usepackage{enumitem}                %% For better enumerate environment
-\setlist[description]{leftmargin=\parindent,labelindent=\parindent}
+% \usepackage{enumitem}                %% For better enumerate environment
+% \setlist[description]{leftmargin=\parindent,labelindent=\parindent}
 \usepackage{caption}
 \usepackage{multirow}                %% for multiple rows in tables
-\usepackage{tikz}                    %% math visualizations
+\usepackage{tikz}                    %% assertion stack visualization
+\usepackage[T1]{fontenc}             %% For escaping special characters in bibtex
 \usetikzlibrary{matrix}
-\usetikzlibrary{arrows.meta}
+\usetikzlibrary{arrows}
 \usetikzlibrary{positioning}
 \usetikzlibrary{shapes.multipart}
 \usetikzlibrary{automata}
+\usetikzlibrary{cd}                  %% for commuting diagrams
 
 \usepackage{lib/paperCommands}
 
@@ -50,20 +51,37 @@
 \SetKwInOut{Input}{Input}                % Set the Input
 \SetKwInOut{Output}{Output}              % set the Output
 
-\lstset{%
+\lstdefinelanguage{SMTLIB}{
+    alsoletter={\-},
+    morekeywords={push,pop,assert,check-sat,declare,const,define,fun,and,or,not,check,sat,get,model,reset},
+    morecomment=[l]{;},
+    morestring=[b]{"},
+    sensitive=false,
+}
+
+\lstset{
   frame=top,frame=bottom,
-  basicstyle=\small\normalfont\ttfamily,    % the size of the fonts that are used for the code
-  stepnumber=1,                                % the step between two line-numbers. If it is 1 each line will be numbered
-  numbersep=10pt,                              % how far the line-numbers are from the code
-  tabsize=2,                                   % tab size in blank spaces
-  extendedchars=true,                          %
-  breaklines=true,                             % sets automatic line breaking
-  captionpos=t,                                % sets the caption-position to top
+  basicstyle=\linespread{.99}\small\normalfont\sffamily,    % the size of the fonts that are used for the code
+  commentstyle=\color{Gray},
+  keywordstyle=\color{NavyBlue},
+  stepnumber=1,                           % the step between two line-numbers. If it is 1 each line will be numbered
+  numbersep=10pt,                         % how far the line-numbers are from the code
+  tabsize=2,                              % tab size in blank spaces
+  extendedchars=true,                     %
+  breaklines=true,                        % sets automatic line breaking
+  captionpos=t,                           % sets the caption-position to top
   mathescape=true,
   showstringspaces=false,
-  escapeinside={(*@}{@*)},
-}%
+  escapeinside={(*@}{@*)},%
+  literate = {-}{-}1
+ }
 
+\newcommand{\lstvdots}{%
+  \raisebox{-1pt}[0pt][0pt]{%
+    \scalebox{0.7}{\ensuremath{\vdots}}}%
+  \hspace{-1.5pt}}
+
+\reversemarginpar
 %%%% new environment for sub-proofs
 \newenvironment{subproof}[1][\proofname]{%
   \renewcommand{\qedsymbol}{\ensuremath{\blacksquare}}%
