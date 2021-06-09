@@ -1,8 +1,8 @@
 \label{section:results-and-discussion}
 %
-\begin{figure}[t]
+\begin{figure}[ht]
     \centering
-    \includegraphics[width=1\linewidth]{Figures/big_ol_cliff.pdf}
+    \includegraphics[width=1\linewidth]{Figures/big_ol_cliff}
     \caption{Results of the \ac{smt} encoding on randomly generated
       Erd\H{o}s-R\'{e}nyi graphs. The z-axis is runtime in minutes, with
       connectivity on the y-axis and vertex count on the x-axis. We see that
@@ -11,13 +11,13 @@
     \label{fig:results}
 \end{figure}%
 %
-\begin{figure}[t]
+\begin{figure}[ht]
   \centering
-  \includegraphics[width=1\linewidth]{Figures/big_ol_cliff.pdf}
+  \includegraphics[width=1\linewidth]{Figures/small_ol_cliff}
   \caption{Results of the \ac{smt} encoding on randomly generated
     Erd\H{o}s-R\'{e}nyi graphs \emph{without} querying for a model. The z-axis
     is runtime in minutes, with connectivity on the y-axis and vertex count on
-    the x-axis. We observe a is \~15x speedup compared to
+    the x-axis. We observe a is $\sim$15x speedup compared to
     \autoref{fig:results}.}%
   \label{fig:results-no-model}
 \end{figure}%
@@ -61,8 +61,10 @@ over symbolic variables is naive. A more efficient implementation would use high
 performance \ac{smt} structures such as \rn{Bit-Vectors}~\cite{BarFT-SMTLIB}
 which have been successfully used to solve constraint networks in electronic
 design~\cite{10.5555/1550723}. Lastly, we observed that in all cases omitting
-the \rn{get-model} call lead to
-
+the \rn{get-model} call lead to $\sim$15x performance speedup (z-axis maximum is
+16 minutes vs 250 minutes) as shown in \autoref{fig:results-no-model}. This
+implies most of the runtime cost is finding the exact edges in the minimum
+feedback arc set rather than finding if there exists a minimum feedback arc set.
 
 Third, there might be specific features of graphs which lead to easier or more
 difficult \ac{smt} problems. For example, previous research has found that
