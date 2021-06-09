@@ -1,11 +1,11 @@
 \label{section:introduction}%
 
-The minimum feedback arc set problem is a canonical NP-Complete problem given
-by\todo{add citation} \citet{KarpNPComplete}. Worse still, the problem is
-APX-hard\todo{cite Viggo Kann thesis} yet finding the minimum feedback arc set
-of a directed graph is desirable for many domains: such as certain rank-choice
-voting systems, tournament ranking systems\todo{cite}, and dependency graphs in
-general.
+The minimum feedback arc set problem is a canonical NP-Complete problem given by
+\citet{KarpNPComplete}. Worse still, \citet{kannthesis} showed that the problem
+is APX-hard. Despite these results finding the minimum feedback arc set of a
+directed graph is desirable for many domains: such as certain rank-choice voting
+systems, tournament ranking systems\todo{colin citation?}, and dependency graphs
+in general.
 
 Solutions to the minimum feedback arc set problem are commonly implemented in
 widely used graph libraries yet all suffer from a distinct flaw. While each
@@ -42,7 +42,7 @@ cycle and deliberately resample \emph{only} the edges in the discovered cycle.
 
 Unfortunately, we find that incremental \ac{smt} for finding a minimum feedback
 arc set suffers from significant issues which seem to be intractable. In
-addition to this exploration we make the following contributions:
+addition to this result we make the following contributions:
 %
 \begin{enumerate}
 \item An identification of the most intractable problems for an incremental
