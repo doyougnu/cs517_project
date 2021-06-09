@@ -17,8 +17,8 @@
 \usepackage{subcaption}              %% For complex figures with subfigures/subcaptions
 \usepackage{wrapfig}                 %% wrapping figures around text
 \usepackage{listings}                %% for source code lstlisting
-% \usepackage{enumitem}                %% For better enumerate environment
-% \setlist[description]{leftmargin=\parindent,labelindent=\parindent}
+\usepackage{enumitem}                %% For better enumerate environment
+\setlist[description]{leftmargin=\parindent,labelindent=\parindent}
 \usepackage{caption}
 \usepackage{multirow}                %% for multiple rows in tables
 \usepackage{tikz}                    %% assertion stack visualization
@@ -95,4 +95,5 @@
    \begin{algorithm}[#1]%
   }{\end{algorithm}}
 
+\renewcommand{\sectionautorefname}{Section }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% End Packages Configs %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

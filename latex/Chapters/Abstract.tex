@@ -1,4 +1,19 @@
-Abstract here
+The minimum feedback arc set problem is the problem of finding the least amount
+of edges in a directed, cyclic, graph, such that if these edges are removed a
+directed, acyclic graph results. There are exists several classic and
+approximate methods to solve the minimum feedback arc set problem. In this
+study, we explore the novel use of \ac{smt} solvers to solve the minimum
+feedback arc set problem. With an \ac{smt} solver, we hypothesize that not only
+is an effective encoding possible, but by employing advanced features of
+\ac{smt} solvers, such as incrementality and unsatisfiable cores, we can provide
+users with decision points to give users the ability to pause the solution
+routine, resample particular edges, alter the problem or inspect intermediate
+results. Our results are negative. We find an effective \ac{smt} encoding for
+the minimum feedback arc set problem but the encoding produces \ac{smt} problems
+that in practice are unreasonably slow. Similarly, we find that to make
+effective use of incrementality and unsatisfiable cores, one would require
+information which is itself an instance of the minimum feedback arc set, and
+thus these features are ill suited to this problem domain.
 
 
 %%% Local Variables:
