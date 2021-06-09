@@ -10,6 +10,17 @@
       connectivity.}%
     \label{fig:results}
 \end{figure}%
+%
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=1\linewidth]{Figures/big_ol_cliff.pdf}
+  \caption{Results of the \ac{smt} encoding on randomly generated
+    Erd\H{o}s-R\'{e}nyi graphs \emph{without} querying for a model. The z-axis
+    is runtime in minutes, with connectivity on the y-axis and vertex count on
+    the x-axis. We observe a is \~15x speedup compared to
+    \autoref{fig:results}.}%
+  \label{fig:results-no-model}
+\end{figure}%
 
 \autoref{fig:results} displays the runtime of the prototype \ac{smt} method to
 find a minimum feedback arc set for randomly generated Erd\H{o}s-R\'{e}nyi
@@ -49,13 +60,14 @@ in this range. Similarly, it could be that our encoding as a simple summation
 over symbolic variables is naive. A more efficient implementation would use high
 performance \ac{smt} structures such as \rn{Bit-Vectors}~\cite{BarFT-SMTLIB}
 which have been successfully used to solve constraint networks in electronic
-design\cite{10.5555/1550723}.
+design~\cite{10.5555/1550723}. Lastly, we observed that in all cases omitting
+the \rn{get-model} call lead to
 
 
-Third, there might be specific features of graphs which lead to
-easier or more difficult \ac{smt} problems. For example, previous research has
-found that tournament graphs, such as \autoref{fig:tournament-graph} are easier
-to solve than the general case.
+Third, there might be specific features of graphs which lead to easier or more
+difficult \ac{smt} problems. For example, previous research has found that
+tournament graphs, such as \autoref{fig:tournament-graph} are easier to solve
+than the general case.
 
 %%% Local Variables:
 %%% mode: latex
