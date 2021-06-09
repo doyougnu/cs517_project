@@ -2,7 +2,8 @@
 
 In this section, we provide background on the minimum feedback arc set problem,
 incremental \ac{sat} and \ac{smt} solving, and unsatisfiable cores. We begin
-with preliminaries on graphs and feedback arc sets.
+with preliminaries on graphs and feedback arc sets. We close the section with a
+description of incremental \ac{sat} solving and \ac{smt} solving.
 
 On a directed graph \graph{G}{V}{E} a \emph{feedback arc set} \fas{S} is a set
 of edges in $\kf{E}$, such that removing them from the graph $\kf{G}$ results in
@@ -10,11 +11,6 @@ an acyclic graph. The minimum feedback arc set problem finds the
 \optimal{\fas{S}} of the minimum size. For weighted graphs, one might desire
 \optimal{\fas{S}} to have the minimum total weight of any \fas{S}. Finding this
 \optimal{\fas{S}} is the minimum weighted feedback arc set problem.
-
-\NOTE{Hi Mike! This is a special note environment just for you. From this point
-  we plan on giving an overview of the necessary interface for sat and smt
-  solving. We're planning on adapting this from Jeff's PhD thesis, so it won't
-  be from whole cloth.}
 
 
 

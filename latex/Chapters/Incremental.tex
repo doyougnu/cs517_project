@@ -1,0 +1,57 @@
+\label{section:incremental}
+
+Our original conception for this study was to explore the use of incremental
+\ac{sat} and \ac{smt} solvers to solve the minimum feedback arc set problem.
+However, we found fundamental problems with this approach during several courses
+of experimentation. In this section, we review the problematic nature of the
+incremental approach for this problem and provide a non-incremental \ac{smt}
+encoding in the next section.
+
+The incremental approach was a combination of two \ac{sat} and \ac{smt}
+features. First, we desired to encode the problem in such a way that an
+\rn{unsat} would be returned from the solver. With an \rn{unsat} returned, we
+could then query for an \emph{unsatisfiable core}, that is, the set of
+constraints which prevent the solver from unifying. Second, we sought to use
+\emph{scopes} to add and remove clauses from the incremental solver via
+\rn{push} and \rn{pop} calls. With scopes it is possible to refine the
+constraints \emph{during} the solving routine, possibly simplifying the problem
+space. We hypothesized that by using scopes and unsatisfiable cores we could
+reveal domain information to the user and direct the solver to a solution in an
+efficient manner.
+
+Unfortunately the incremental approach has numerous problems for finding the
+minimum feedback arc set, which appear to be intractable. First, in order to
+generate unsatisfiable cores constraints must be added to the solver instance
+\emph{and watched}. In and of itself, this is not an intractable problem, the
+\acl{smtlib} standard defines a function to track constraints called
+\rn{assert\_and\_track} which takes a constraint and a name. The name is then
+returned in the unsatisfiable core if the concomitant constraint is in the core.
+The issue becomes a constant time cost incurred by parsing the unsatisfiable
+core into a usable format for the solving routine to continue. The pattern
+becomes: query for an unsatisfiable core, parse the core, refine the
+constraints, and then repeat. Thus the constant time cost is exacerbated for
+every core that is generated.
+
+The more serious issue is the use of scopes is problematic for tackling the
+minimum feedback arc set problem at all. While scopes would allow one to direct
+the solver to a solution, or explore possible solutions, it requires knowledge
+of the problem domain which is not readily available during the encoding
+process. In order to employ scopes, one must know before the encoding step which
+constraints are likely to change. This knowledge is required so that the
+constraints can be pushed onto the assertion stack \emph{as late as possible}.
+When these constraints are on top of the assertion stack (and thus pushed last)
+they can be removed from the assertion stack \emph{without} removing constraints
+that we do not wish to refine. Without this knowledge, there is a substantial
+risk that the we may need to remove all, or almost all constraints from the
+solver just to repack the solver and refine the query. In the worst case, this
+requires an additional complete traversal of the graph. The issue is further
+exacerbated by the minimum feedback arc set problem because it is not possible
+to know before hand which edges, and thus which constraints, will need to be
+refined. In fact finding the unique set of constraints that will need to be
+refined is itself an instance of finding the minimum feedback arc set!
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../main"
+%%% End:

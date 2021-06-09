@@ -36,8 +36,8 @@ A minimum unsatisfiable core is the minimum set of clauses in a \ac{sat} or
 \ac{smt} formula which prevent a \ac{sat} or \ac{smt} solver run from finding a
 satisfiable assignment. An incremental solver provides the end-user the ability
 to add or remove constraints and thereby direct the solver during runtime.
-Incrementality in our approach is crucial as it the end-user decision points to
-interact with the solution process. Thus, an end-user might observe a
+Incrementality in our approach is crucial as it allows the user decision points
+to interact with the solution process. Thus, a user might observe a
 unsatisfiable core which corresponds to a cycle and deliberately resample
 \emph{only} the edges in the discovered cycle.
 
@@ -45,7 +45,7 @@ The approach has benefits \ldots{}
 
 We make the following contributions:
 \begin{enumerate}
-\item Gadgets
+\item An \ac{smt} encoding to find the minimum feedback arc set
 \item Evaluation of unsatisfiable cores for this problem domain
 \item empirical evaluation of this novel\todo{again, is it novel?} method
 \end{enumerate}
