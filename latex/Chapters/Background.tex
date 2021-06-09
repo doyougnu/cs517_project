@@ -48,10 +48,10 @@ The ability to add and remove terms is enabled by manipulating the
 interface provides two commands: \rn{push} to create a new \emph{scope} and add
 a level to the stack, and \rn{pop} to remove the topmost level on the stack.
 Consider the following \acl{smtlib} program which demonstrates three levels on
-the assertion stack. The \acl{smtlib} standard is an international standard that
-defines a general interface for \ac{sat} and \ac{smt} solvers. The program
-follows the procedure outlined in \autoref{fig:bkg:inc} and solves \pV, \qV{}
-and \rV{}:
+the assertion stack. The \acl{smtlib} standard~\cite{BarFT-SMTLIB} is an
+international standard that defines a general interface for \ac{sat} and
+\ac{smt} solvers. The program follows the procedure outlined in
+\autoref{fig:bkg:inc} and solves \pV, \qV{} and \rV{}:
 
 \begin{lstlisting}[columns=flexible,keepspaces=true,language=SMTLIB]
 (declare-const a Bool)         ;; variable declarations for p

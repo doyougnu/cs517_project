@@ -30,7 +30,10 @@ The issue becomes a constant time cost incurred by parsing the unsatisfiable
 core into a usable format for the solving routine to continue. The pattern
 becomes: query for an unsatisfiable core, parse the core, refine the
 constraints, and then repeat. Thus the constant time cost is exacerbated for
-every core that is generated.
+every core that is generated. In addition, there is no guarantee that the
+unsatisfiable core itself is minimal, although some \ac{sat}/\ac{smt} solvers,
+such as z3~\cite{10.1007/978-3-540-78800-3_24} expose a setting to produce
+minimal cores at the expense of performance.
 
 The more serious issue is the use of scopes is problematic for tackling the
 minimum feedback arc set problem at all. While scopes would allow one to direct
