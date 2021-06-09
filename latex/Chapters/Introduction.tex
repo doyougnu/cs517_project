@@ -26,28 +26,32 @@ opponents rather than remove the win. Crucially, the result of the rematch may
 change the final minimum feedback arc set. Such a procedure could therefore
 increase the confidence in the results of the tournament.
 
-To allow for \emph{inspectable incrementality} we propose a novel\todo{but is it
-  novel?} direction in solving the minimum feedback arc set problem based on
-recent advances in \ac{sat} and \ac{smt} solving. Our approach is to utilize an
-\ac{smt} solver to detect cycles and minimize the weight of the feedback arc
-set. Incrementality in this approach is given through use of an
-\emph{incremental} \ac{smt} solver and generation of \emph{unsatisfiable cores}.
-A minimum unsatisfiable core is the minimum set of clauses in a \ac{sat} or
-\ac{smt} formula which prevent a \ac{sat} or \ac{smt} solver run from finding a
-satisfiable assignment. An incremental solver provides the end-user the ability
-to add or remove constraints and thereby direct the solver during runtime.
-Incrementality in our approach is crucial as it allows the user decision points
-to interact with the solution process. Thus, a user might observe a
-unsatisfiable core which corresponds to a cycle and deliberately resample
-\emph{only} the edges in the discovered cycle.
+To allow for \emph{inspectable incrementality} we propose a novel direction in
+solving the minimum feedback arc set problem based on recent advances in
+\ac{sat} and \ac{smt} solving. Our approach is to utilize an \ac{smt} solver to
+detect cycles and minimize the weight of the feedback arc set. Incrementality in
+this approach is given through use of an \emph{incremental} \ac{smt} solver and
+generation of \emph{unsatisfiable cores}. A minimum unsatisfiable core is the
+minimum set of clauses in a \ac{sat} or \ac{smt} formula which prevent a
+\ac{sat} or \ac{smt} solver run from finding a satisfiable assignment. An
+incremental solver provides the user the ability to add or remove constraints
+and thereby direct the solver during runtime. Incrementality in our approach is
+crucial as it allows the user decision points to interact with the solution
+process. Thus, a user might observe a unsatisfiable core which corresponds to a
+cycle and deliberately resample \emph{only} the edges in the discovered cycle.
 
-The approach has benefits \ldots{}
-
-We make the following contributions:
+Unfortunately, we find that incremental \ac{smt} for finding a minimum feedback
+arc set suffers from significant issues which seem to be intractable. In
+addition to this exploration we make the following contributions:
+%
 \begin{enumerate}
-\item An \ac{smt} encoding to find the minimum feedback arc set
-\item Evaluation of unsatisfiable cores for this problem domain
-\item empirical evaluation of this novel\todo{again, is it novel?} method
+\item An identification of the most intractable problems for an incremental
+  \ac{smt} encoding on the minimum feedback arc set problem.
+  (\autoref{section:incremental})
+\item An \ac{smt} encoding to find the minimum feedback arc set of an arbitrary
+  directed and cyclic graph. (\autoref{section:gadgets})
+\item An empirical evaluation of the \ac{smt} encoding.
+  (\autoref{section:results-and-discussion})
 \end{enumerate}
 
 
